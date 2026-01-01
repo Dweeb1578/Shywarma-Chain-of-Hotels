@@ -1,0 +1,96 @@
+.footer {
+    background: #1C1917;
+    color: white;
+    padding: 80px 0 40px;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+.brand p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logoImg {
+    height: 100px;
+    width: auto;
+}
+
+.brandName {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: white;
+    display: block;
+}
+
+.brandText {
+    margin-left: 12px;
+}
+
+.brandSub {
+    font-size: 0.85rem;
+    color: #C5A059;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -2px;
+}
+
+.links h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.links ul {
+    list-style: none;
+}
+
+.links li {
+    margin-bottom: 12px;
+}
+
+.links a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.links a:hover {
+    color: #C5A059;
+}
+
+.bottom {
+    padding-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bottom p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}

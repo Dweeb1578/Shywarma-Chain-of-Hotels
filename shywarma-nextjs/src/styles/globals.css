@@ -1,0 +1,102 @@
+/* Premium Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+:root {
+    --obsidian-roast: #1C1917;
+    --aged-parchment: #F5F2ED;
+    --heirloom-gold: #C5A059;
+    --burnt-umber: #5C4033;
+    --gold-hover: #D4AF6A;
+    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-playfair: 'Playfair Display', Georgia, serif;
+    --shadow-sm: 0 2px 8px rgba(28, 25, 23, 0.08);
+    --shadow-md: 0 8px 24px rgba(28, 25, 23, 0.12);
+    --shadow-lg: 0 16px 48px rgba(28, 25, 23, 0.16);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-inter);
+    background: var(--aged-parchment);
+    color: var(--obsidian-roast);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-playfair);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font-family: var(--font-inter);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Smooth page transitions */
+main {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Selection style */
+::selection {
+    background: rgba(197, 160, 89, 0.3);
+    color: var(--obsidian-roast);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--aged-parchment);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--burnt-umber);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--heirloom-gold);
+}

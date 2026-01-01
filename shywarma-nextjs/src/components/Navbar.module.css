@@ -1,0 +1,192 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 16px 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(to bottom, rgba(28, 25, 23, 0.9), transparent);
+}
+
+.scrolled {
+    background: rgba(245, 242, 237, 0.97);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(28, 25, 23, 0.08);
+    padding: 12px 0;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.02);
+}
+
+.logoImg {
+    height: 85px;
+    width: auto;
+}
+
+.scrolled .logoImg {
+    height: 65px;
+}
+
+.brandName {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: white;
+    margin-left: -8px;
+    letter-spacing: 0.02em;
+}
+
+.scrolled .brandName {
+    color: #1C1917;
+}
+
+.brandText {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
+    margin-top: 4px;
+}
+
+.brandSub {
+    font-size: 0.7rem;
+    color: #C5A059;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    margin-left: -8px;
+}
+
+.navLinks {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+}
+
+.navLinks a {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 8px 0;
+}
+
+.navLinks a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #C5A059;
+    transition: width 0.3s ease;
+}
+
+.navLinks a:hover::after {
+    width: 100%;
+}
+
+.scrolled .navLinks a {
+    color: #1C1917;
+}
+
+.navLinks a:hover {
+    color: #C5A059;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btnGhost {
+    background: transparent;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.scrolled .btnGhost {
+    color: #1C1917;
+}
+
+.btnGhost:hover {
+    color: #C5A059;
+    background: rgba(197, 160, 89, 0.1);
+}
+
+.btnPrimary {
+    background: linear-gradient(135deg, #C5A059, #D4AF6A);
+    color: #1C1917;
+    border: none;
+    padding: 12px 28px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btnPrimary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(197, 160, 89, 0.35);
+}
+
+.mobileMenuBtn {
+    display: none;
+}
+
+@media (max-width: 900px) {
+
+    .navLinks,
+    .actions {
+        display: none;
+    }
+
+    .mobileMenuBtn {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+    }
+
+    .mobileMenuBtn span {
+        width: 24px;
+        height: 2px;
+        background: white;
+        transition: all 0.3s ease;
+    }
+
+    .scrolled .mobileMenuBtn span {
+        background: #1C1917;
+    }
+}
