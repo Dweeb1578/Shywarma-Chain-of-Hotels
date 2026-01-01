@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shywarma Hotels - Discover exceptional stays worldwide with exclusive deals.">
+    <title>Shywarma Hotels | Extraordinary Stays</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo"><img src="logo.png" alt="Shywarma Hotels & Resorts" class="logo-img"></a>
+            <ul class="nav-links">
+                <li><a href="#destinations">Destinations</a></li>
+                <li><a href="#rooms">Rooms</a></li>
+                <li><a href="#offers">Offers</a></li>
+                <li><a href="#experiences">Experiences</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn-ghost">Sign In</button>
+                <button class="btn-primary">Book Now</button>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <header class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <span class="hero-tagline">EXTRAORDINARY ESCAPES</span>
+            <h1 class="hero-title">Where Luxury Meets <span class="text-accent">Unforgettable</span> Moments</h1>
+            <p class="hero-subtitle">Discover handpicked hotels and resorts that redefine comfort.</p>
+            <div class="booking-widget">
+                <div class="booking-field">
+                    <label>Destination</label>
+                    <div class="field-input">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <input type="text" placeholder="Where are you going?">
+                    </div>
+                </div>
+                <div class="booking-divider"></div>
+                <div class="booking-field">
+                    <label>Check In</label>
+                    <div class="field-input">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <input type="text" placeholder="Add date">
+                    </div>
+                </div>
+                <div class="booking-divider"></div>
+                <div class="booking-field">
+                    <label>Check Out</label>
+                    <div class="field-input">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <input type="text" placeholder="Add date">
+                    </div>
+                </div>
+                <div class="booking-divider"></div>
+                <div class="booking-field">
+                    <label>Guests</label>
+                    <div class="field-input">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                        </svg>
+                        <input type="text" placeholder="Add guests">
+                    </div>
+                </div>
+                <button class="booking-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>Search</button>
+            </div>
+        </div>
+        <div class="scroll-indicator"><span>Scroll to explore</span>
+            <div class="scroll-line"></div>
+        </div>
+    </header>
+
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item"><span class="stat-number">500+</span><span class="stat-label">Luxury
+                        Properties</span></div>
+                <div class="stat-item"><span class="stat-number">120</span><span class="stat-label">Countries
+                        Worldwide</span></div>
+                <div class="stat-item"><span class="stat-number">2M+</span><span class="stat-label">Happy Guests</span>
+                </div>
+                <div class="stat-item"><span class="stat-number">4.9</span><span class="stat-label">Average
+                        Rating</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="destinations-section" id="destinations">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">POPULAR DESTINATIONS</span>
+                <h2 class="section-title">Explore Our Finest Locations</h2>
+                <p class="section-desc">From tropical paradises to urban retreats, discover destinations that inspire.
+                </p>
+            </div>
+            <div class="destinations-grid">
+                <article class="destination-card destination-large">
+                    <div class="destination-image" style="background: linear-gradient(135deg, #1C1917, #5C4033);"></div>
+                    <div class="destination-overlay"></div>
+                    <div class="destination-content"><span class="destination-count">24 Properties</span>
+                        <h3>Maldives</h3>
+                        <p>Crystal waters & overwater villas</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <div class="destination-image" style="background: linear-gradient(135deg, #5C4033, #C5A059);"></div>
+                    <div class="destination-overlay"></div>
+                    <div class="destination-content"><span class="destination-count">38 Properties</span>
+                        <h3>Santorini</h3>
+                        <p>Sunset views & white architecture</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <div class="destination-image" style="background: linear-gradient(135deg, #C5A059, #F5F2ED);"></div>
+                    <div class="destination-overlay"></div>
+                    <div class="destination-content"><span class="destination-count">52 Properties</span>
+                        <h3>Dubai</h3>
+                        <p>Opulence & modern luxury</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <div class="destination-image" style="background: linear-gradient(135deg, #1C1917, #C5A059);"></div>
+                    <div class="destination-overlay"></div>
+                    <div class="destination-content"><span class="destination-count">31 Properties</span>
+                        <h3>Bali</h3>
+                        <p>Tropical serenity & culture</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <div class="destination-image" style="background: linear-gradient(135deg, #5C4033, #1C1917);"></div>
+                    <div class="destination-overlay"></div>
+                    <div class="destination-content"><span class="destination-count">45 Properties</span>
+                        <h3>Paris</h3>
+                        <p>Romance & timeless elegance</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="rooms-section" id="rooms">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">FEATURED ACCOMMODATIONS</span>
+                <h2 class="section-title">Rooms Crafted for Excellence</h2>
+                <p class="section-desc">Each space tells a story of comfort.</p>
+            </div>
+            <div class="rooms-grid">
+                <article class="room-card">
+                    <div class="room-image">
+                        <div class="room-placeholder" style="background: linear-gradient(180deg, #C5A059, #5C4033);">
+                            <div class="placeholder-icon">🛏️</div>
+                        </div>
+                        <span class="room-badge">Best Seller</span>
+                        <button class="room-favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg></button>
+                    </div>
+                    <div class="room-content">
+                        <div class="room-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg><span>4.9</span><span class="review-count">(128 reviews)</span></div>
+                        <h3 class="room-title">Ocean View Suite</h3>
+                        <p class="room-location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>Maldives, South Malé Atoll</p>
+                        <div class="room-amenities"><span>King Bed</span><span>Ocean View</span><span>Private
+                                Pool</span></div>
+                        <div class="room-footer">
+                            <div class="room-price"><span class="price-amount">$589</span><span class="price-period">/
+                                    night</span></div><button class="btn-book">Book Now</button>
+                        </div>
+                    </div>
+                </article>
+                <article class="room-card">
+                    <div class="room-image">
+                        <div class="room-placeholder" style="background: linear-gradient(180deg, #1C1917, #5C4033);">
+                            <div class="placeholder-icon">🏨</div>
+                        </div>
+                        <span class="room-badge premium">Premium</span>
+                        <button class="room-favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg></button>
+                    </div>
+                    <div class="room-content">
+                        <div class="room-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg><span>5.0</span><span class="review-count">(89 reviews)</span></div>
+                        <h3 class="room-title">Presidential Penthouse</h3>
+                        <p class="room-location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>Dubai, Palm Jumeirah</p>
+                        <div class="room-amenities"><span>2 Bedrooms</span><span>City View</span><span>Butler
+                                Service</span></div>
+                        <div class="room-footer">
+                            <div class="room-price"><span class="price-amount">$1,299</span><span class="price-period">/
+                                    night</span></div><button class="btn-book">Book Now</button>
+                        </div>
+                    </div>
+                </article>
+                <article class="room-card">
+                    <div class="room-image">
+                        <div class="room-placeholder" style="background: linear-gradient(180deg, #5C4033, #C5A059);">
+                            <div class="placeholder-icon">🏡</div>
+                        </div>
+                        <button class="room-favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg></button>
+                    </div>
+                    <div class="room-content">
+                        <div class="room-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg><span>4.8</span><span class="review-count">(214 reviews)</span></div>
+                        <h3 class="room-title">Garden Villa Retreat</h3>
+                        <p class="room-location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>Bali, Ubud</p>
+                        <div class="room-amenities"><span>Queen Bed</span><span>Garden View</span><span>Spa
+                                Access</span></div>
+                        <div class="room-footer">
+                            <div class="room-price"><span class="price-amount">$349</span><span class="price-period">/
+                                    night</span></div><button class="btn-book">Book Now</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="section-cta"><button class="btn-outline">View All Rooms</button></div>
+        </div>
+    </section>
+
+    <section class="offers-section" id="offers">
+        <div class="container">
+            <div class="offers-wrapper">
+                <div class="offers-content">
+                    <span class="section-tag">LIMITED TIME</span>
+                    <h2 class="section-title">Exclusive Member Offers</h2>
+                    <p class="offers-desc">Join Shywarma Elite and unlock unprecedented savings on your next getaway.
+                    </p>
+                    <div class="offer-highlights">
+                        <div class="offer-item">
+                            <div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                                </svg></div>
+                            <div class="offer-text">
+                                <h4>Up to 40% Off</h4>
+                                <p>On selected properties</p>
+                            </div>
+                        </div>
+                        <div class="offer-item">
+                            <div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg></div>
+                            <div class="offer-text">
+                                <h4>Free Cancellation</h4>
+                                <p>Flexible booking policy</p>
+                            </div>
+                        </div>
+                        <div class="offer-item">
+                            <div class="offer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                                </svg></div>
+                            <div class="offer-text">
+                                <h4>Earn Points</h4>
+                                <p>$1 = 10 Shywarma Points</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary btn-large">Become a Member</button>
+                </div>
+                <div class="offers-visual">
+                    <div class="offer-card-stack">
+                        <div class="offer-card offer-card-1">
+                            <div class="offer-card-content"><span class="offer-discount">-30%</span>
+                                <h5>Weekend Escape</h5>
+                                <p>Valid until Jan 31</p>
+                            </div>
+                        </div>
+                        <div class="offer-card offer-card-2">
+                            <div class="offer-card-content"><span class="offer-discount">-40%</span>
+                                <h5>Honeymoon Package</h5>
+                                <p>Limited availability</p>
+                            </div>
+                        </div>
+                        <div class="offer-card offer-card-3">
+                            <div class="offer-card-content"><span class="offer-discount">-25%</span>
+                                <h5>Extended Stay</h5>
+                                <p>7+ nights booking</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="experiences-section" id="experiences">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">CURATED EXPERIENCES</span>
+                <h2 class="section-title">Beyond the Stay</h2>
+                <p class="section-desc">Transform your trip into an unforgettable journey.</p>
+            </div>
+            <div class="experiences-grid">
+                <article class="experience-card">
+                    <div class="experience-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="12" r="4" />
+                            <path
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+                        </svg></div>
+                    <h3>Wellness & Spa</h3>
+                    <p>Rejuvenate with world-class spa treatments.</p><a href="#" class="experience-link">Explore
+                        <span>→</span></a>
+                </article>
+                <article class="experience-card">
+                    <div class="experience-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M3 3h18v18H3zM3 9h18M9 21V9" />
+                        </svg></div>
+                    <h3>Fine Dining</h3>
+                    <p>Savor creations by Michelin-starred chefs.</p><a href="#" class="experience-link">Explore
+                        <span>→</span></a>
+                </article>
+                <article class="experience-card">
+                    <div class="experience-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <path
+                                d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                        </svg></div>
+                    <h3>Adventure Tours</h3>
+                    <p>Embark on thrilling expeditions worldwide.</p><a href="#" class="experience-link">Explore
+                        <span>→</span></a>
+                </article>
+                <article class="experience-card">
+                    <div class="experience-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                        </svg></div>
+                    <h3>Cultural Immersion</h3>
+                    <p>Connect with local traditions and heritage.</p><a href="#" class="experience-link">Explore
+                        <span>→</span></a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="section-header"><span class="section-tag">GUEST STORIES</span>
+                <h2 class="section-title">What Our Guests Say</h2>
+            </div>
+            <div class="testimonials-grid">
+                <article class="testimonial-card">
+                    <div class="testimonial-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg></div>
+                    <p class="testimonial-text">"An absolutely magical experience. The attention to detail made our
+                        honeymoon unforgettable!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SJ</div>
+                        <div class="author-info">
+                            <h4>Sarah Johnson</h4><span>Stayed in Maldives</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="testimonial-card featured">
+                    <div class="testimonial-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg></div>
+                    <p class="testimonial-text">"Shywarma has completely changed how I travel. Every stay feels like a
+                        five-star experience."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MC</div>
+                        <div class="author-info">
+                            <h4>Michael Chen</h4><span>Elite Member since 2022</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="testimonial-card">
+                    <div class="testimonial-rating"><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg><svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg></div>
+                    <p class="testimonial-text">"From airport pickup to farewell gift, everything was perfect. The
+                        concierge was outstanding!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">EP</div>
+                        <div class="author-info">
+                            <h4>Emma Patel</h4><span>Stayed in Bali</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-wrapper">
+                <div class="newsletter-content">
+                    <h2>Stay Inspired</h2>
+                    <p>Subscribe for exclusive offers and travel tips.</p>
+                </div>
+                <form class="newsletter-form"><input type="email" placeholder="Enter your email address"
+                        required><button type="submit" class="btn-primary">Subscribe</button></form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="logo"><img src="logo.png" alt="Shywarma Hotels & Resorts"
+                            class="logo-img footer-logo"></a>
+                    <p>Redefining luxury hospitality with handpicked properties worldwide.</p>
+                    <div class="social-links">
+                        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+                            </svg></a>
+                        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+                            </svg></a>
+                        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="5" />
+                                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                            </svg></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Safety</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Shywarma Hotels & Resorts. All rights reserved.</p>
+                <div class="footer-badges"><span>🌍 Global</span><span>🔒 Secure</span><span>✓ Verified</span></div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
