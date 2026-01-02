@@ -8,7 +8,7 @@
     background: linear-gradient(rgba(28, 25, 23, 0.6), rgba(28, 25, 23, 0.6)), url('/images/destinations/maldives.png');
     background-size: cover;
     background-position: center;
-    color: var(--color-parchment);
+    color: #FFFFFF;
     text-align: center;
     padding: 120px 20px;
     margin-bottom: 60px;
@@ -18,7 +18,7 @@
     font-family: var(--font-fancy);
     font-size: 4rem;
     margin-bottom: 20px;
-    color: var(--color-gold);
+    color: #FFFFFF;
 }
 
 .hero p {
