@@ -33,7 +33,7 @@ export default function Navbar() {
                     <li><Link href="/#destinations">Destinations</Link></li>
                     <li><Link href="/#rooms">Rooms</Link></li>
                     <li><Link href="/#offers">Offers</Link></li>
-                    <li><Link href="/chat">Chat</Link></li>
+                    <li><Link href="/packages">Travel Packages</Link></li>
                 </ul>
                 <div className={styles.actions}>
                     <button className={styles.btnGhost}>Sign In</button>

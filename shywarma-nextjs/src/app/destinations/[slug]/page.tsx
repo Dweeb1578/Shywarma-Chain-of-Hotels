@@ -70,7 +70,9 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                                     </div>
                                     <h3>{hotel.name}</h3>
                                     <p>{hotel.description}</p>
-                                    <button className={styles.btn}>View Rooms</button>
+                                    <Link href={`/destinations/${slug}/${hotel.slug}`} className={styles.btn}>
+                                        View Rooms
+                                    </Link>
                                 </div>
                             </div>
                         ))}
@@ -99,7 +101,7 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                                 <div className={styles.roomContent}>
                                     <h3>{room.name}</h3>
                                     <p className={styles.price}>
-                                        ${room.price}<span> / night</span>
+                                        {room.price.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}<span> / night</span>
                                     </p>
                                     <ul className={styles.features}>
                                         {room.features.map((f) => (
@@ -114,8 +116,55 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                 </div>
             </section>
 
-            {/* Amenities Section */}
+            {/* Travel Packages Section */}
             <section className={styles.section}>
+                <div className={styles.container}>
+                    <div className={styles.sectionHeader}>
+                        <span className={styles.sectionTag}>CURATED EXPERIENCES</span>
+                        <h2>Exclusive Travel Packages</h2>
+                    </div>
+                    <div className={styles.packagesGrid}>
+                        {destination.packages.map((pkg) => (
+                            <div key={pkg.name} className={styles.packageCard}>
+                                <div className={styles.packageImageWrapper}>
+                                    <Image
+                                        src={pkg.image}
+                                        alt={pkg.name}
+                                        fill
+                                        className={styles.packageImage}
+                                    />
+                                    <div className={styles.packageOverlay}>
+                                        <span className={styles.duration}>{pkg.duration}</span>
+                                    </div>
+                                </div>
+                                <div className={styles.packageContent}>
+                                    <h3>{pkg.name}</h3>
+                                    <p className={styles.packageDesc}>{pkg.description}</p>
+                                    <div className={styles.inclusions}>
+                                        <h4>Includes:</h4>
+                                        <ul>
+                                            {pkg.inclusions.slice(0, 4).map((inc) => (
+                                                <li key={inc}>• {inc}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    <div className={styles.packageFooter}>
+                                        <div className={styles.packagePrice}>
+                                            <span>From</span>
+                                            <strong>{pkg.price.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</strong>
+                                            <span>/ person</span>
+                                        </div>
+                                        <button className={styles.btnOutline}>View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Amenities Section */}
+            <section className={styles.section} style={{ background: "white" }}>
                 <div className={styles.container}>
                     <div className={styles.sectionHeader}>
                         <span className={styles.sectionTag}>WORLD-CLASS</span>

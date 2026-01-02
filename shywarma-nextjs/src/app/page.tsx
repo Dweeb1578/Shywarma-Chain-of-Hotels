@@ -72,9 +72,9 @@ export default function Home() {
                     </div>
                     <div className={styles.roomsGrid}>
                         {[
-                            { name: "Ocean View Suite", price: "$589", image: "/images/rooms/ocean-suite.png" },
-                            { name: "Presidential Penthouse", price: "$1,299", image: "/images/rooms/penthouse.png" },
-                            { name: "Garden Villa Retreat", price: "$349", image: "/images/rooms/garden-villa.png" },
+                            { name: "Ocean View Suite", price: "₹34,999", image: "/images/rooms/ocean-suite.png" },
+                            { name: "Presidential Penthouse", price: "₹79,999", image: "/images/rooms/penthouse.png" },
+                            { name: "Garden Villa Retreat", price: "₹19,999", image: "/images/rooms/garden-villa.png" },
                         ].map((room) => (
                             <div key={room.name} className={styles.roomCard}>
                                 <div className={styles.roomCardImage}>

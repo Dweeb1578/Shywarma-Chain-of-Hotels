@@ -33,16 +33,26 @@
 }
 
 .backLink {
-    display: inline-block;
-    color: #C5A059;
+    display: inline-flex;
+    align-items: center;
+    color: white;
     text-decoration: none;
     font-size: 0.9rem;
-    margin-bottom: 16px;
-    transition: opacity 0.3s;
+    font-weight: 500;
+    margin-bottom: 24px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 16px;
+    border-radius: 30px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
 }
 
 .backLink:hover {
-    opacity: 0.8;
+    background: rgba(197, 160, 89, 0.9);
+    color: white;
+    transform: translateX(-5px);
+    border-color: rgba(197, 160, 89, 0.9);
 }
 
 .tagline {
@@ -179,11 +189,14 @@
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(197, 160, 89, 0.4);
+    color: white;
 }
 
 /* Rooms Grid */
@@ -260,6 +273,166 @@
     padding: 6px 0;
     color: #5C4033;
     font-size: 0.9rem;
+}
+
+/* Travel Packages Grid */
+.packagesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px;
+}
+
+@media (max-width: 600px) {
+    .packagesGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.packageCard {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.packageCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.packageImageWrapper {
+    position: relative;
+    height: 240px;
+    overflow: hidden;
+}
+
+.packageImage {
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.packageCard:hover .packageImage {
+    transform: scale(1.05);
+}
+
+.packageOverlay {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+}
+
+.duration {
+    background: rgba(28, 25, 23, 0.85);
+    color: #C5A059;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.05em;
+}
+
+.packageContent {
+    padding: 32px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.packageCard h3 {
+    font-family: var(--font-playfair);
+    font-size: 1.6rem;
+    color: #1C1917;
+    margin: 0 0 12px;
+}
+
+.packageDesc {
+    color: #5C4033;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+}
+
+.inclusions {
+    margin-bottom: 24px;
+    background: #F9F7F5;
+    padding: 20px;
+    border-radius: 12px;
+    flex: 1;
+}
+
+.inclusions h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #C5A059;
+    margin: 0 0 12px;
+}
+
+.inclusions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.inclusions li {
+    font-size: 0.9rem;
+    color: #1C1917;
+    font-weight: 500;
+}
+
+.packageFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.packagePrice {
+    display: flex;
+    flex-direction: column;
+}
+
+.packagePrice span:first-child {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.packagePrice strong {
+    font-size: 1.8rem;
+    color: #1C1917;
+    font-family: var(--font-playfair);
+}
+
+.packagePrice span:last-child {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.btnOutline {
+    background: transparent;
+    color: #1C1917;
+    border: 2px solid #1C1917;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btnOutline:hover {
+    background: #1C1917;
+    color: white;
 }
 
 /* Amenities Grid */

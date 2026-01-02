@@ -384,7 +384,14 @@
 
     .dropdownTrigger {
         justify-content: center;
-        gap: 12px;
+        position: relative;
+    }
+
+    .dropdownTrigger svg {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .searchBtn {
