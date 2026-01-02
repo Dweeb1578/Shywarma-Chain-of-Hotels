@@ -43,17 +43,47 @@ function DatePicker({ value, onChange, minDate, onClose }: DatePickerProps) {
     const today = new Date();
     const [viewYear, setViewYear] = useState(value?.getFullYear() || today.getFullYear());
     const [viewMonth, setViewMonth] = useState(value?.getMonth() ?? today.getMonth());
+    const [isClosing, setIsClosing] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            onClose();
+        }, 300); // Match animation duration
+    };
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                onClose();
+            if (isClosing) return; // Already closing
+
+            if (ref.current && ref.current.contains(e.target as Node)) {
+                return;
+            }
+
+            // Check if clicking on the parent field that opened this picker
+            const target = e.target as HTMLElement;
+            const clickedField = target.closest(`.${styles.bookingField}`);
+
+            // Always close with animation when clicking outside the picker
+            handleClose();
+
+            // If clicking a different field, prevent propagation so it can open
+            if (clickedField) {
+                e.stopPropagation();
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [onClose]);
+
+        // Use setTimeout to avoid catching the opening click
+        const timer = setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+        }, 10);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isClosing]);
 
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
@@ -84,7 +114,7 @@ function DatePicker({ value, onChange, minDate, onClose }: DatePickerProps) {
         const selected = new Date(viewYear, viewMonth, day);
         if (minDate && selected < minDate) return;
         onChange(selected);
-        onClose();
+        handleClose();
     };
 
     const isPastDate = (day: number): boolean => {
@@ -98,7 +128,7 @@ function DatePicker({ value, onChange, minDate, onClose }: DatePickerProps) {
     const canGoPrev = !(viewYear === today.getFullYear() && viewMonth === today.getMonth());
 
     return (
-        <div ref={ref} className={styles.datePicker}>
+        <div ref={ref} className={`${styles.datePicker} ${isClosing ? styles.datePickerClosing : ""}`}>
             <div className={styles.datePickerHeader}>
                 <button
                     type="button"
@@ -206,7 +236,7 @@ export default function BookingWidget() {
             <div className={styles.bookingDivider}></div>
 
             {/* Check In Date */}
-            <div className={styles.bookingField} onClick={() => { setShowCheckInPicker(true); setShowCheckOutPicker(false); }}>
+            <div className={styles.bookingField} onClick={() => { setShowCheckInPicker(!showCheckInPicker); setShowCheckOutPicker(false); }}>
                 <label>Check In</label>
                 <span className={`${styles.inputDisplay} ${checkIn ? styles.hasValue : ""}`}>
                     {checkIn ? formatDate(checkIn) : "Add date"}
@@ -224,7 +254,7 @@ export default function BookingWidget() {
             <div className={styles.bookingDivider}></div>
 
             {/* Check Out Date */}
-            <div className={styles.bookingField} onClick={() => { setShowCheckOutPicker(true); setShowCheckInPicker(false); }}>
+            <div className={styles.bookingField} onClick={() => { setShowCheckOutPicker(!showCheckOutPicker); setShowCheckInPicker(false); }}>
                 <label>Check Out</label>
                 <span className={`${styles.inputDisplay} ${checkOut ? styles.hasValue : ""}`}>
                     {checkOut ? formatDate(checkOut) : "Add date"}

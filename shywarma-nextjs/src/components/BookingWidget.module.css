@@ -9,14 +9,7 @@
     margin: 0 auto;
 }
 
-@media (max-width: 900px) {
-    .bookingWidget {
-        flex-direction: column;
-        border-radius: 24px;
-        padding: 24px;
-        gap: 16px;
-    }
-}
+
 
 .bookingField {
     flex: 1;
@@ -161,7 +154,35 @@
     z-index: 200;
     padding: 20px;
     min-width: 300px;
-    animation: dropIn 0.25s ease-out;
+    animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.datePickerClosing {
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
 }
 
 .datePickerHeader {
@@ -334,6 +355,38 @@
 }
 
 @media (max-width: 900px) {
+    .bookingWidget {
+        flex-direction: column;
+        border-radius: 24px;
+        padding: 24px;
+        gap: 8px;
+        max-width: 100%;
+    }
+
+    .bookingField {
+        text-align: center;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #f0ede8;
+    }
+
+    .bookingField:last-of-type {
+        border-bottom: none;
+    }
+
+    .bookingField label {
+        text-align: center;
+    }
+
+    .guestsWrapper {
+        justify-content: center;
+    }
+
+    .dropdownTrigger {
+        justify-content: center;
+        gap: 12px;
+    }
+
     .searchBtn {
         width: 100%;
         padding: 18px 32px;
