@@ -1,0 +1,347 @@
+.bookingWidget {
+    display: flex;
+    align-items: stretch;
+    background: white;
+    border-radius: 60px;
+    padding: 8px 8px 8px 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+    .bookingWidget {
+        flex-direction: column;
+        border-radius: 24px;
+        padding: 24px;
+        gap: 16px;
+    }
+}
+
+.bookingField {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.bookingField:hover {
+    background: rgba(245, 242, 237, 0.6);
+}
+
+.bookingField label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #5C4033;
+    margin-bottom: 2px;
+}
+
+.bookingField .inputDisplay {
+    font-size: 0.9rem;
+    color: #888;
+    cursor: pointer;
+}
+
+.bookingField .inputDisplay.hasValue {
+    color: #1C1917;
+}
+
+.bookingDivider {
+    width: 1px;
+    background: #e8e4df;
+    margin: 8px 0;
+    flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+    .bookingDivider {
+        display: none;
+    }
+}
+
+/* Dropdown */
+.dropdownWrapper {
+    position: relative;
+}
+
+.dropdownTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    gap: 12px;
+    font-family: inherit;
+}
+
+.dropdownTrigger.hasValue {
+    color: #1C1917;
+}
+
+.dropdownTrigger svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 16px);
+    left: -24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.18);
+    z-index: 100;
+    padding: 8px;
+    min-width: 200px;
+    animation: dropIn 0.2s ease-out;
+}
+
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdownItem {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: #1C1917;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 10px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+.dropdownItem:hover {
+    background: #F5F2ED;
+    color: #C5A059;
+}
+
+.dropdownItem.active {
+    background: linear-gradient(135deg, #C5A059, #5C4033);
+    color: white;
+    font-weight: 600;
+}
+
+/* Custom Date Picker */
+.datePicker {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    z-index: 200;
+    padding: 20px;
+    min-width: 300px;
+    animation: dropIn 0.25s ease-out;
+}
+
+.datePickerHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 0 4px;
+}
+
+.datePickerTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1C1917;
+    letter-spacing: 0.01em;
+}
+
+.datePickerNav {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #F5F2ED;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5C4033;
+    transition: all 0.2s;
+}
+
+.datePickerNav:hover:not(:disabled) {
+    background: #C5A059;
+    color: white;
+}
+
+.datePickerNav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.datePickerDays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.dayLabel {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #999;
+    text-align: center;
+    padding: 8px 0;
+    letter-spacing: 0.05em;
+}
+
+.datePickerGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.dayBtn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #1C1917;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.dayBtn:hover:not(:disabled):not(.empty) {
+    background: #F5F2ED;
+    color: #C5A059;
+}
+
+.dayBtn.selected {
+    background: linear-gradient(135deg, #C5A059, #a8864a);
+    color: white;
+    font-weight: 600;
+}
+
+.dayBtn.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.dayBtn.empty {
+    cursor: default;
+}
+
+/* Guests */
+.guestsWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.guestBtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid #d4d0cb;
+    background: white;
+    color: #5C4033;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.guestBtn:hover:not(:disabled) {
+    border-color: #C5A059;
+    color: #C5A059;
+    background: rgba(197, 160, 89, 0.08);
+}
+
+.guestBtn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.guestCount {
+    font-size: 0.9rem;
+    color: #1C1917;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Search Button */
+.searchBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #C5A059 0%, #a8864a 100%);
+    color: white;
+    border: none;
+    padding: 0 36px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    min-height: 54px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+}
+
+.searchBtn:hover {
+    background: linear-gradient(135deg, #d4b16a 0%, #C5A059 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(197, 160, 89, 0.35);
+}
+
+.searchBtn svg {
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 900px) {
+    .searchBtn {
+        width: 100%;
+        padding: 18px 32px;
+    }
+
+    .datePicker {
+        left: 0;
+        transform: none;
+        min-width: 100%;
+    }
+}

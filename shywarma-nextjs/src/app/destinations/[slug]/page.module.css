@@ -1,0 +1,361 @@
+/* Hero Section */
+.hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 60px 24px;
+}
+
+.heroImage {
+    object-fit: cover;
+    z-index: 1;
+}
+
+.heroOverlay {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    color: white;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+}
+
+.heroOverlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    left: -100vw;
+    right: -100vw;
+    bottom: -60px;
+    top: -200px;
+    background: linear-gradient(to top, rgba(28, 25, 23, 0.95) 0%, rgba(28, 25, 23, 0.7) 40%, transparent 100%);
+    z-index: -1;
+}
+
+.backLink {
+    display: inline-block;
+    color: #C5A059;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    transition: opacity 0.3s;
+}
+
+.backLink:hover {
+    opacity: 0.8;
+}
+
+.tagline {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: #C5A059;
+    padding: 8px 20px;
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    border-radius: 30px;
+    background: rgba(197, 160, 89, 0.1);
+    margin-bottom: 20px;
+}
+
+.heroOverlay h1 {
+    font-family: var(--font-playfair);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    margin: 0 0 16px;
+    font-weight: 600;
+}
+
+.heroOverlay p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    opacity: 0.9;
+    max-width: 600px;
+}
+
+/* Sections */
+.section {
+    padding: 80px 0;
+    background: #F5F2ED;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.sectionHeader {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.sectionTag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: #C5A059;
+    margin-bottom: 12px;
+}
+
+.sectionHeader h2 {
+    font-family: var(--font-playfair);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin: 0;
+    color: #1C1917;
+}
+
+/* Hotels Grid */
+.hotelsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 32px;
+}
+
+@media (max-width: 600px) {
+    .hotelsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hotelCard {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.hotelCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.hotelImageWrapper {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+}
+
+.hotelImage {
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.hotelCard:hover .hotelImage {
+    transform: scale(1.05);
+}
+
+.hotelContent {
+    padding: 28px;
+}
+
+.stars {
+    color: #C5A059;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.hotelCard h3 {
+    font-family: var(--font-playfair);
+    font-size: 1.5rem;
+    margin: 0 0 12px;
+    color: #1C1917;
+}
+
+.hotelCard p {
+    color: #5C4033;
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.btn {
+    background: linear-gradient(135deg, #C5A059, #5C4033);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(197, 160, 89, 0.4);
+}
+
+/* Rooms Grid */
+.roomsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 32px;
+}
+
+@media (max-width: 400px) {
+    .roomsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.roomCard {
+    background: #F5F2ED;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transition: transform 0.4s ease;
+}
+
+.roomCard:hover {
+    transform: translateY(-6px);
+}
+
+.roomImageWrapper {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+}
+
+.roomImage {
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.roomCard:hover .roomImage {
+    transform: scale(1.05);
+}
+
+.roomContent {
+    padding: 24px;
+}
+
+.roomCard h3 {
+    font-family: var(--font-playfair);
+    font-size: 1.3rem;
+    margin: 0 0 8px;
+    color: #1C1917;
+}
+
+.price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #C5A059;
+    margin: 0 0 16px;
+}
+
+.price span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #5C4033;
+}
+
+.features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+}
+
+.features li {
+    padding: 6px 0;
+    color: #5C4033;
+    font-size: 0.9rem;
+}
+
+/* Amenities Grid */
+.amenitiesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.amenityCard {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.amenityCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.amenityIcon {
+    display: block;
+    font-size: 1.5rem;
+    color: #C5A059;
+    margin-bottom: 12px;
+}
+
+.amenityCard span:last-child {
+    font-weight: 500;
+    color: #1C1917;
+}
+
+/* Reviews Grid */
+.reviewsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 28px;
+}
+
+@media (max-width: 400px) {
+    .reviewsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.reviewCard {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(197, 160, 89, 0.2);
+    border-radius: 20px;
+    padding: 28px;
+    backdrop-filter: blur(10px);
+}
+
+.reviewStars {
+    color: #C5A059;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+}
+
+.reviewText {
+    color: rgba(255, 255, 255, 0.9);
+    font-style: italic;
+    line-height: 1.7;
+    margin: 0 0 20px;
+}
+
+.reviewAuthor {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C5A059, #5C4033);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.reviewAuthor strong {
+    display: block;
+    color: white;
+    font-size: 1rem;
+}
+
+.reviewAuthor span {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}

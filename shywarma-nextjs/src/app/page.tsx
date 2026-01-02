@@ -1,6 +1,8 @@
 import styles from "./page.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import ChatWidget from "@/components/ChatWidget";
+import BookingWidget from "@/components/BookingWidget";
 
 export default function Home() {
     return (
@@ -19,33 +21,7 @@ export default function Home() {
                     <h1>Where Luxury Meets <span className={styles.accent}>Unforgettable</span> Moments</h1>
                     <p>Discover handpicked hotels and resorts that redefine comfort. Your perfect getaway is just a click away.</p>
 
-                    <div className={styles.bookingWidget}>
-                        <div className={styles.bookingField}>
-                            <label>Destination</label>
-                            <input type="text" placeholder="Where are you going?" />
-                        </div>
-                        <div className={styles.bookingDivider}></div>
-                        <div className={styles.bookingField}>
-                            <label>Check In</label>
-                            <input type="text" placeholder="Add date" />
-                        </div>
-                        <div className={styles.bookingDivider}></div>
-                        <div className={styles.bookingField}>
-                            <label>Check Out</label>
-                            <input type="text" placeholder="Add date" />
-                        </div>
-                        <div className={styles.bookingDivider}></div>
-                        <div className={styles.bookingField}>
-                            <label>Guests</label>
-                            <input type="text" placeholder="Add guests" />
-                        </div>
-                        <button className={styles.searchBtn}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-                            </svg>
-                            Search
-                        </button>
-                    </div>
+                    <BookingWidget />
                 </div>
             </header>
 
@@ -64,13 +40,13 @@ export default function Home() {
                     </div>
                     <div className={styles.destinationsGrid}>
                         {[
-                            { name: "Maldives", image: "/images/destinations/maldives.png", desc: "Crystal waters & overwater villas" },
-                            { name: "Santorini", image: "/images/destinations/santorini.png", desc: "Sunset views & white architecture" },
-                            { name: "Dubai", image: "/images/destinations/dubai.png", desc: "Opulence & modern luxury" },
-                            { name: "Bali", image: "/images/destinations/bali.png", desc: "Tropical serenity & culture" },
-                            { name: "Paris", image: "/images/destinations/paris.png", desc: "Romance & timeless elegance" },
+                            { name: "Maldives", slug: "maldives", image: "/images/destinations/maldives.png", desc: "Crystal waters & overwater villas" },
+                            { name: "Santorini", slug: "santorini", image: "/images/destinations/santorini.png", desc: "Sunset views & white architecture" },
+                            { name: "Dubai", slug: "dubai", image: "/images/destinations/dubai.png", desc: "Opulence & modern luxury" },
+                            { name: "Bali", slug: "bali", image: "/images/destinations/bali.png", desc: "Tropical serenity & culture" },
+                            { name: "Paris", slug: "paris", image: "/images/destinations/paris.png", desc: "Romance & timeless elegance" },
                         ].map((dest) => (
-                            <div key={dest.name} className={styles.destCard}>
+                            <Link key={dest.name} href={`/destinations/${dest.slug}`} className={styles.destCard}>
                                 <Image
                                     src={dest.image}
                                     alt={dest.name}
@@ -82,7 +58,7 @@ export default function Home() {
                                     <h3>{dest.name}</h3>
                                     <p style={{ margin: 0, opacity: 0.9, fontSize: '0.9rem' }}>{dest.desc}</p>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
