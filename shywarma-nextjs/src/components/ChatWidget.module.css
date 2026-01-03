@@ -505,13 +505,16 @@
 
 @media (max-width: 480px) {
     .chatBox {
-        width: 100%;
-        height: 100dvh;
-        /* Dynamic viewport height for functional mobile UI */
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
-        max-height: 100dvh;
+        width: calc(100% - 32px);
+        /* 16px margins */
+        height: 70vh;
+        /* 70% of screen height */
+        bottom: 100px;
+        /* Sit clearly above the FAB */
+        right: 16px;
+        border-radius: 24px;
+        /* Restore rounded corners */
+        max-height: 80vh;
     }
 
     .fab {
@@ -547,10 +550,6 @@
     /* Safe Area for iPhone Home Bar */
     .inputArea {
         padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-
-    .mobileCloseBtn {
-        display: block !important;
     }
 }
 
