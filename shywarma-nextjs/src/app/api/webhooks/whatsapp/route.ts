@@ -65,11 +65,17 @@ export async function POST(req: NextRequest) {
                         .select()
                         .single();
 
-                    if (createError) {
+                    if (createError || !newUser) {
                         console.error('[WHATSAPP] Failed to create user:', createError);
                         return NextResponse.json({ error: 'DB Error' }, { status: 500 });
                     }
                     user = newUser;
+                }
+
+                if (!user) {
+                    // Should be unreachable but satisfies TS
+                    console.error('[WHATSAPP] User is null after creation flow');
+                    return NextResponse.json({ error: 'User Not Found' }, { status: 500 });
                 }
 
                 // B. Store Message
