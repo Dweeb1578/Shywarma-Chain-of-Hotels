@@ -45,9 +45,11 @@ export default async function HotelPage({ params }: { params: Promise<{ slug: st
                     <Link href={`/destinations/${slug}`} className={styles.backLink}>
                         ← Back to {slug.charAt(0).toUpperCase() + slug.slice(1)}
                     </Link>
-                    <div className={styles.hotelTag}>LUXURY COLLECTION</div>
-                    <div className={styles.stars}>{"★".repeat(hotel.stars)}</div>
                     <h1>{hotel.name}</h1>
+                    <div className={styles.hotelMeta}>
+                        <span className={styles.hotelTag}>LUXURY COLLECTION</span>
+                        <span className={styles.stars}>{"★".repeat(hotel.stars)}</span>
+                    </div>
                     <p>{hotel.description}</p>
                 </div>
             </header>

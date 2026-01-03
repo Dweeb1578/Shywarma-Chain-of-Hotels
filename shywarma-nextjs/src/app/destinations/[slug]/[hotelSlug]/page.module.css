@@ -58,25 +58,27 @@
 }
 
 .hotelTag {
-    display: inline-block;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
     color: #C5A059;
-    padding: 8px 16px;
+    padding: 6px 14px;
     border: 1px solid rgba(197, 160, 89, 0.4);
-    border-radius: 30px;
-    background: rgba(197, 160, 89, 0.1);
-    margin-bottom: 20px;
-    margin-right: 12px;
+    border-radius: 20px;
+    background: rgba(197, 160, 89, 0.15);
+}
+
+.hotelMeta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .stars {
     color: #C5A059;
-    font-size: 1.2rem;
+    font-size: 1rem;
     letter-spacing: 2px;
-    margin-bottom: 16px;
-    display: inline-block;
 }
 
 .heroOverlay h1 {

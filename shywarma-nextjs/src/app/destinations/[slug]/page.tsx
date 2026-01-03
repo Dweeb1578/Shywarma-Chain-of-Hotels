@@ -40,8 +40,8 @@ export default async function DestinationPage({ params }: { params: Promise<{ sl
                 />
                 <div className={styles.heroOverlay}>
                     <Link href="/" className={styles.backLink}>← Back to Destinations</Link>
-                    <span className={styles.tagline}>{destination.tagline}</span>
                     <h1>{destination.name}</h1>
+                    <span className={styles.tagline}>{destination.tagline}</span>
                     <p>{destination.description}</p>
                 </div>
             </header>
