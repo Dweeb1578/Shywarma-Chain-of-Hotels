@@ -114,37 +114,14 @@ export default function ChatWidget() {
     const [streamingText, setStreamingText] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // WhatsApp Connect State
-    const { syncCustomer } = useChat();
-    const [showPhoneInput, setShowPhoneInput] = useState(false);
-    const [phoneInput, setPhoneInput] = useState("");
-    const [verifyLoading, setVerifyLoading] = useState(false);
-    const [verifyError, setVerifyError] = useState("");
+    // WhatsApp Connect State REMOVED
+    // const { syncCustomer } = useChat(); <- Removed usage
+    // const [showPhoneInput, setShowPhoneInput] = useState(false);
+    // const [phoneInput, setPhoneInput] = useState("");
+    // const [verifyLoading, setVerifyLoading] = useState(false);
+    // const [verifyError, setVerifyError] = useState("");
 
-    const handleVerifyPhone = async () => {
-        if (!phoneInput.trim()) return;
-        setVerifyLoading(true);
-        setVerifyError("");
-        try {
-            const res = await fetch('/api/auth/verify-phone', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phoneInput })
-            });
-            const data = await res.json();
-            if (data.found && data.userId) {
-                syncCustomer(data.userId);
-                setShowPhoneInput(false);
-                setPhoneInput("");
-            } else {
-                setVerifyError("Number not found. Please try again.");
-            }
-        } catch (e) {
-            setVerifyError("Verification failed.");
-        } finally {
-            setVerifyLoading(false);
-        }
-    }
+    // handleVerifyPhone removed
 
     const handleSend = async (manualInput?: string) => {
         // Use manualInput if provided, otherwise fall back to state input
@@ -374,38 +351,24 @@ export default function ChatWidget() {
                                     ))}
                                 </div>
 
-                                <div className={styles.whatsappConnect}>
-                                    {!showPhoneInput ? (
-                                        <button className={styles.whatsappBtn} onClick={() => setShowPhoneInput(true)}>
-                                            Already chatting on WhatsApp?
-                                        </button>
-                                    ) : (
-                                        <div className={styles.phoneInputArea}>
-                                            <button
-                                                className={styles.closePhoneBtn}
-                                                onClick={() => {
-                                                    setShowPhoneInput(false);
-                                                    setVerifyError("");
-                                                }}
-                                            >✕</button>
-                                            <p className={styles.phoneDesc}>
-                                                Enter your number to sync your chat history securely.
-                                            </p>
-                                            <div className={styles.phoneRow}>
-                                                <input
-                                                    type="tel"
-                                                    placeholder="+1234567890"
-                                                    value={phoneInput}
-                                                    onChange={(e) => setPhoneInput(e.target.value)}
-                                                    className={styles.phoneInput}
-                                                />
-                                                <button onClick={handleVerifyPhone} disabled={verifyLoading}>
-                                                    {verifyLoading ? '...' : 'Go'}
-                                                </button>
-                                            </div>
-                                            {verifyError && <span className={styles.errorText}>{verifyError}</span>}
-                                        </div>
-                                    )}
+                                <div className={styles.escalationActions}>
+                                    <p className={styles.escalationTitle}>Need more help?</p>
+                                    <div className={styles.escalationButtons}>
+                                        <a
+                                            href="https://wa.me/919963894342"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={styles.whatsappActionBtn}
+                                        >
+                                            <span className={styles.btnIcon}>💬</span> Chat on WhatsApp
+                                        </a>
+                                        <a
+                                            href="tel:+919963894342"
+                                            className={styles.callActionBtn}
+                                        >
+                                            <span className={styles.btnIcon}>📞</span> Call Support
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         )}

@@ -643,121 +643,74 @@
     font-weight: 600;
 }
 
-/* WhatsApp Connect */
-.whatsappConnect {
-    margin-top: 24px;
+/* Escalation Actions */
+.escalationActions {
+    margin-top: 32px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px dashed rgba(92, 64, 51, 0.15);
+    width: 100%;
 }
 
-.whatsappBtn {
-    background: transparent;
-    border: 1px solid #25D366;
-    color: #25D366;
-    padding: 8px 16px;
-    border-radius: 20px;
+.escalationTitle {
     font-size: 0.85rem;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+    color: #A8A29E;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.escalationButtons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.whatsappActionBtn,
+.callActionBtn {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-}
-
-.whatsappBtn:hover {
-    background: #DCFCE7;
-}
-
-.whatsappBtn::before {
-    content: '💬';
-    /* Simple icon substitution */
-    filter: hue-rotate(90deg);
-}
-
-.phoneInputArea {
-    background: #fff;
-    padding: 16px;
+    padding: 10px 12px;
     border-radius: 12px;
-    border: 1px solid rgba(92, 64, 51, 0.1);
-    width: 100%;
-    animation: fadeIn 0.3s ease;
-    position: relative;
-    /* For absolute close btn */
-}
-
-/* Close button top right */
-.closePhoneBtn {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
     font-size: 0.9rem;
-    color: #A8A29E;
-    padding: 4px;
-    line-height: 1;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-
-.closePhoneBtn:hover {
-    color: #EF4444;
-    background: #FEE2E2;
-}
-
-.phoneDesc {
-    font-size: 0.8rem;
-    color: #78716C;
-    margin: 0 0 12px 0;
-    text-align: left;
-    line-height: 1.4;
-    padding-right: 16px;
-    /* Space for close btn */
-}
-
-.phoneRow {
-    display: flex;
-    gap: 8px;
-}
-
-.phoneInput {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #E7E5E4;
-    border-radius: 8px;
-    outline: none;
-    font-size: 0.9rem;
-    background: #FAFAF9;
-}
-
-.phoneInput:focus {
-    border-color: #C5A059;
-    background: #fff;
-}
-
-.phoneRow button {
-    background: #1C1917;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
     font-weight: 600;
-    font-size: 0.85rem;
-    transition: background 0.2s;
+    text-decoration: none !important;
+    /* Override message link styles */
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
-.phoneRow button:hover {
-    background: #C5A059;
+.whatsappActionBtn {
+    background: #DCFCE7;
+    color: #166534 !important;
+    border: 1px solid #22c55e;
 }
 
-.errorText {
-    color: #EF4444;
-    font-size: 0.75rem;
-    margin-top: 8px;
-    display: block;
-    text-align: left;
+.whatsappActionBtn:hover {
+    background: #BBF7D0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.callActionBtn {
+    background: #F5F5F4;
+    color: #44403C !important;
+    border: 1px solid #D6D3D1;
+}
+
+.callActionBtn:hover {
+    background: #E7E5E4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.btnIcon {
+    font-size: 1.1rem;
 }
