@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Only create client if keys exist (prevents build errors)
+export const supabase = (supabaseUrl && supabaseKey)
+    ? createClient(supabaseUrl, supabaseKey)
+    : null;
 
 // Log a chat interaction
 export async function logChatInteraction(data: {
@@ -12,6 +15,9 @@ export async function logChatInteraction(data: {
     bot_response: string;
     response_time_ms: number;
 }) {
+    // Fail silently if Supabase is not configured
+    if (!supabase) return;
+
     try {
         const { error } = await supabase
             .from('chat_logs')
