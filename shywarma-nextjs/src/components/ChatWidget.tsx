@@ -338,6 +338,13 @@ export default function ChatWidget() {
                                         🗑
                                     </button>
                                 )}
+                                <button
+                                    className={styles.clearBtn} // Reusing same style for consistency
+                                    onClick={toggleChat}
+                                    title="Close Chat"
+                                >
+                                    ✕
+                                </button>
                             </div>
                         </div>
                         {conversations.length > 1 && (
