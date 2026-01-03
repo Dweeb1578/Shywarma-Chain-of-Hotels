@@ -26,7 +26,9 @@ export async function logChatInteraction(data: {
                 user_query: data.user_query,
                 bot_response: data.bot_response,
                 response_time_ms: data.response_time_ms,
-                created_at: new Date().toISOString()
+                // Log IST wall-clock time as UTC (Best for redability in Supabase if viewed as UTC)
+                // Adds 5.5 hours to current UTC to get IST numbers
+                created_at: new Date(Date.now() + (5.5 * 60 * 60 * 1000)).toISOString()
             }]);
 
         if (error) {

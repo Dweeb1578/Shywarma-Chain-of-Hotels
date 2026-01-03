@@ -7,6 +7,10 @@ import { PineconeStore } from "@langchain/pinecone";
 import { logChatInteraction } from "@/lib/supabase";
 
 // Initialize clients ONCE (singleton pattern)
+import Redis from 'ioredis';
+import crypto from 'crypto';
+
+// Initialize clients ONCE (singleton pattern)
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY,
 });
@@ -15,25 +19,14 @@ const pinecone = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY!,
 });
 
-const embeddings = new CohereEmbeddings({
-    apiKey: process.env.COHERE_API_KEY,
-    model: "embed-english-v3.0", // Must match the model used for ingestion
-});
-
+// Remove Cohere initialization - using Integrated Inference now
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX!;
+const EMBEDDING_MODEL = "multilingual-e5-large";
 
-// Simple in-memory cache for repeated queries
-const queryCache = new Map<string, string>();
-
-// Reusable vector store instance
-let vectorStore: PineconeStore | null = null;
-
-async function getVectorStore() {
-    if (!vectorStore) {
-        const pineconeIndex = pinecone.Index(PINECONE_INDEX_NAME);
-        vectorStore = await PineconeStore.fromExistingIndex(embeddings, { pineconeIndex });
-    }
-    return vectorStore;
+// Initialize Redis if URL is available
+let redis: Redis | null = null;
+if (process.env.REDIS_URL) {
+    redis = new Redis(process.env.REDIS_URL);
 }
 
 export async function POST(req: NextRequest) {
@@ -43,24 +36,64 @@ export async function POST(req: NextRequest) {
         const lastMessage = messages[messages.length - 1];
         const userQuery = lastMessage.content;
 
-        // Check cache first
-        const cacheKey = userQuery.toLowerCase().trim();
-        const cachedContext = queryCache.get(cacheKey);
+        // Hash query for cache key
+        const queryHash = crypto.createHash('md5').update(userQuery.toLowerCase().trim()).digest('hex');
+        const cacheKey = `chat:context:${queryHash}`;
 
-        let context: string;
+        let context: string | null = null;
 
-        if (cachedContext) {
-            console.log(`[CACHE HIT] Query: "${cacheKey.slice(0, 30)}..."`);
-            context = cachedContext;
-        } else {
+        // Check Redis Cache
+        if (redis) {
+            try {
+                const cached = await redis.get(cacheKey);
+                if (cached) {
+                    console.log(`[CACHE HIT] Redis Key: ${cacheKey}`);
+                    context = cached;
+                }
+            } catch (err) {
+                console.error("Redis Get Error:", err);
+            }
+        }
+
+        if (!context) {
             const searchStart = Date.now();
-            const store = await getVectorStore();
-            const results = await store.similaritySearch(userQuery, 3); // Balanced coverage
-            context = results.map((r) => r.pageContent).join("\n\n---\n\n");
-            console.log(`[SEARCH] ${Date.now() - searchStart}ms`);
 
-            // Cache the result
-            queryCache.set(cacheKey, context);
+            // 1. Generate Embedding via Pinecone Inference (Server-Side)
+            const embeddingResult = await pinecone.inference.embed(
+                EMBEDDING_MODEL,
+                [userQuery],
+                { inputType: 'query', truncate: 'END' }
+            );
+
+            const embeddingData = (embeddingResult as any).data || embeddingResult;
+            const queryVector = embeddingData[0].values;
+
+            // 2. Search Index using generated vector
+            const index = pinecone.Index(PINECONE_INDEX_NAME);
+            const queryResponse = await index.query({
+                vector: queryVector,
+                topK: 3,
+                includeMetadata: true
+            });
+
+            console.log(`[PINECONE] Matches Found: ${queryResponse.matches.length}`);
+
+            // 3. Extract Context
+            context = queryResponse.matches
+                .map((match: any) => match.metadata?.text || "")
+                .filter((text: string) => text.length > 0)
+                .join("\n\n---\n\n");
+
+            console.log(`[SEARCH + EMBED] ${Date.now() - searchStart}ms`);
+
+            // Save to Redis (7 days TTL)
+            if (redis) {
+                try {
+                    await redis.setex(cacheKey, 7 * 24 * 60 * 60, context);
+                } catch (err) {
+                    console.error("Redis Set Error:", err);
+                }
+            }
         }
 
         // 3. Construct System Prompt (Static part for Caching)
