@@ -339,7 +339,7 @@ export default function ChatWidget() {
                                     </button>
                                 )}
                                 <button
-                                    className={styles.clearBtn} // Reusing same style for consistency
+                                    className={`${styles.clearBtn} ${styles.mobileCloseBtn}`}
                                     onClick={toggleChat}
                                     title="Close Chat"
                                 >

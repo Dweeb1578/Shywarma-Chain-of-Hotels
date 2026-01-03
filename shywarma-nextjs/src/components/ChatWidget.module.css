@@ -548,6 +548,14 @@
     .inputArea {
         padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
+
+    .mobileCloseBtn {
+        display: block !important;
+    }
+}
+
+.mobileCloseBtn {
+    display: none;
 }
 
 /* Hotel Card Styles */
