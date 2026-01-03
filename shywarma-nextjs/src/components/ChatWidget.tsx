@@ -9,9 +9,22 @@ import remarkGfm from 'remark-gfm';
 import HotelCarousel from './HotelCarousel';
 
 export default function ChatWidget() {
-    const { messages, conversations, currentConversationId, addMessage, startNewConversation, switchConversation, deleteConversation, clearMessages, isOpen, toggleChat } = useChat();
+    const {
+        messages,
+        conversations,
+        currentConversationId,
+        addMessage,
+        startNewConversation,
+        switchConversation,
+        deleteConversation,
+        clearMessages,
+        isOpen,
+        toggleChat,
+        suggestedQuestion,
+        setSuggestedQuestion
+    } = useChat();
     const [input, setInput] = useState("");
-    const [suggestedQuestion, setSuggestedQuestion] = useState<string | null>(null);
+    // Removed local suggestedQuestion state
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
@@ -81,33 +94,44 @@ export default function ChatWidget() {
         recognition.start();
     };
 
-    const handleQuickSuggestion = (question: string) => {
-        setInput(question);
-        // Auto-send after a short delay
-        setTimeout(() => {
-            const fakeEvent = { key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>;
-            handleKeyDown(fakeEvent);
-        }, 100);
+
+    // Helper to send a message programmatically immediately
+    const sendQueryImmediately = (query: string) => {
+        if (!query.trim() || isLoading) return;
+
+        // 1. Set input visibly for a split second (optional UX preference, but good for context)
+        setInput(query);
+
+        // 2. Clear suggestions
+        setSuggestedQuestion(null);
+
+        // 3. Trigger send logic DIRECTLY (bypass simulation)
+        // We need to pass the query explicitly to handleSend or refactor handleSend to take an arg.
+        // Refactoring handleSend to accept an optional argument is cleaner.
+        handleSend(query);
     };
 
     const [streamingText, setStreamingText] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
+    const handleSend = async (manualInput?: string) => {
+        // Use manualInput if provided, otherwise fall back to state input
+        const textToSend = manualInput || input;
 
-        const userText = input.trim();
+        if (!textToSend.trim() || isLoading) return;
+
+        // Clear input state immediately
         setInput("");
         setSuggestedQuestion(null);
         setIsLoading(true);
         setStreamingText("");
 
         // Add user message immediately
-        addMessage("user", userText);
+        addMessage("user", textToSend);
 
         try {
             // Hybrid Approach: Check for keywords first for guaranteed UI cards
-            const lowerInput = userText.toLowerCase();
+            const lowerInput = textToSend.toLowerCase();
             let attachments: any[] = [];
 
             // Check for destination matches
@@ -150,7 +174,7 @@ export default function ChatWidget() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    messages: [...messages, { role: "user", content: userText }]
+                    messages: [...messages, { role: "user", content: textToSend }]
                 }),
             });
 
@@ -230,6 +254,13 @@ export default function ChatWidget() {
         }
     };
 
+    // Update Quick Suggestion Handler
+    const handleQuickSuggestion = (question: string) => {
+        sendQueryImmediately(question);
+    };
+
+    // Update Dynamic Suggestion Handler (in JSX below)
+    // We'll update the onClick in the JSX directly to call sendQueryImmediately logic or use handleSend directly.
     return (
         <>
             {/* FAB Tooltip */}
@@ -353,13 +384,7 @@ export default function ChatWidget() {
                                 onClick={() => {
                                     const q = suggestedQuestion;
                                     setSuggestedQuestion(null);
-                                    // Set input and trigger send
-                                    setInput(q || '');
-                                    // Use a ref to trigger handleSend after state update
-                                    setTimeout(() => {
-                                        const sendBtn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
-                                        if (sendBtn) sendBtn.click();
-                                    }, 100);
+                                    handleSend(q);
                                 }}
                             >
                                 <span className={styles.suggestionIcon}>💡</span>
@@ -373,18 +398,24 @@ export default function ChatWidget() {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Type or speak..."
+                            placeholder={isListening ? "Listening..." : "Type a message..."}
+                            className={`${styles.input} ${isListening ? styles.inputListening : ''}`}
                         />
                         <button
                             className={`${styles.micBtn} ${isListening ? styles.listening : ''}`}
-                            onClick={startListening}
-                            title="Voice input"
+                            onClick={isListening ? () => { } : startListening}
+                            title="Voice Input"
                         >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15a.998.998 0 00-.98-.85c-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-                            </svg>
+                            {isListening ? '🎙️' : '🎤'}
                         </button>
-                        <button onClick={handleSend} data-send-btn>Send</button>
+                        <button
+                            className={styles.sendBtn}
+                            onClick={() => handleSend()}
+                            disabled={!input.trim() || isLoading}
+                            data-send-btn
+                        >
+                            Send
+                        </button>
                     </div>
                 </div>
             )}

@@ -24,6 +24,7 @@ interface Conversation {
     id: string;
     title: string;
     messages: Message[];
+    suggestedQuestion?: string | null;
     createdAt: Date;
 }
 
@@ -31,6 +32,8 @@ interface ChatContextType {
     messages: Message[];
     conversations: Conversation[];
     currentConversationId: string | null;
+    suggestedQuestion: string | null;
+    setSuggestedQuestion: (question: string | null) => void;
     addMessage: (role: "user" | "assistant", content: string, attachments?: Attachment[]) => void;
     clearMessages: () => void;
     startNewConversation: () => void;
@@ -86,9 +89,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    // Get current conversation's messages
+    // Get current conversation's data
     const currentConversation = conversations.find(c => c.id === currentConversationId);
     const messages = currentConversation?.messages || [];
+    const suggestedQuestion = currentConversation?.suggestedQuestion || null;
+
+    const setSuggestedQuestion = (question: string | null) => {
+        if (!currentConversationId) return;
+        setConversations(prev => {
+            const updated = prev.map(c =>
+                c.id === currentConversationId ? { ...c, suggestedQuestion: question } : c
+            );
+            saveConversations(updated);
+            return updated;
+        });
+    };
 
     const addMessage = (role: "user" | "assistant", content: string, attachments?: Attachment[]) => {
         const newMessage: Message = {
@@ -108,7 +123,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     id: generateId(),
                     title: content.substring(0, 30) + (content.length > 30 ? '...' : ''),
                     messages: [newMessage],
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    suggestedQuestion: null
                 };
                 updated = [newConvo, ...prev];
                 setCurrentConversationId(newConvo.id);
@@ -135,7 +151,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         if (!currentConversationId) return;
         setConversations(prev => {
             const updated = prev.map(c =>
-                c.id === currentConversationId ? { ...c, messages: [] } : c
+                c.id === currentConversationId ? { ...c, messages: [], suggestedQuestion: null } : c
             );
             saveConversations(updated);
             return updated;
@@ -147,7 +163,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             id: generateId(),
             title: 'New Chat',
             messages: [],
-            createdAt: new Date()
+            createdAt: new Date(),
+            suggestedQuestion: null
         };
         setConversations(prev => {
             const updated = [newConvo, ...prev];
@@ -180,6 +197,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             messages,
             conversations,
             currentConversationId,
+            suggestedQuestion,
+            setSuggestedQuestion,
             addMessage,
             clearMessages,
             startNewConversation,
