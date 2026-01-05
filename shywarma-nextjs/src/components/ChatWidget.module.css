@@ -173,7 +173,8 @@
 }
 
 .newChatBtn,
-.clearBtn {
+.clearBtn,
+.headerContactBtn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: #C5A059;
@@ -183,10 +184,15 @@
     cursor: pointer;
     font-size: 1rem;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 .newChatBtn:hover,
-.clearBtn:hover {
+.clearBtn:hover,
+.headerContactBtn:hover {
     background: rgba(255, 255, 255, 0.2);
 }
 
@@ -713,4 +719,91 @@
 
 .btnIcon {
     font-size: 1.1rem;
+}
+
+/* Dismissable Escalation Banner */
+.escalationBanner {
+    background: linear-gradient(135deg, #FEFCE8, #FEF9C3);
+    border: 1px solid #FDE047;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 8px 0;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.escalationBanner p {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    color: #854D0E;
+    font-weight: 500;
+    padding-right: 24px;
+}
+
+.escalationClose {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #A16207;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.escalationClose:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.escalationBannerBtns {
+    display: flex;
+    gap: 8px;
+}
+
+.escalationBannerBtns a {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.escalationBannerBtns a:first-child {
+    background: #25D366;
+    color: white !important;
+}
+
+.itineraryAction {
+    margin: 8px 0 16px 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.viewItineraryBtn {
+    background: linear-gradient(135deg, #1C1917, #2D2A26);
+    color: #C5A059;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.viewItineraryBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(197, 160, 89, 0.2);
+    background: #000;
 }

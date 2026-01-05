@@ -198,36 +198,36 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         };
 
         setConversations(prev => {
-            let updated: Conversation[];
-
-            // Critical Fix: Ensure we are targeting a valid conversation
             let activeId = currentIdRef.current;
-            const targetExists = activeId && prev.some(c => c.id === activeId);
 
-            if (!activeId || !targetExists) {
-                // If ID is missing OR not found in current state (Zombie ID), create NEW
-                // console.log("Creating NEW conversation (Reason: " + (!activeId ? "No ID" : "Zombie ID") + ")");
+            // Find the conversation in prev (it might exist or might have been created in a prior queued update)
+            let targetConvo = activeId ? prev.find(c => c.id === activeId) : null;
 
+            if (!targetConvo) {
+                // Create a NEW conversation if no valid target exists
+                const newConvoId = generateId();
                 const newConvo: Conversation = {
-                    id: generateId(),
-                    title: content.substring(0, 30) + (content.length > 30 ? '...' : ''),
+                    id: newConvoId,
+                    title: role === 'user' ? content.substring(0, 30) + (content.length > 30 ? '...' : '') : 'New Chat',
                     messages: [newMessage],
                     createdAt: new Date(),
                     suggestedQuestion: null
                 };
-                updated = [newConvo, ...prev];
 
-                // Force update Ref immediately to correct any drift
-                activeId = newConvo.id;
-                updateCurrentId(newConvo.id);
+                // CRITICAL: Update the ref IMMEDIATELY so subsequent addMessage calls use this ID
+                currentIdRef.current = newConvoId;
+                // Also queue the state update (will be batched)
+                setCurrentConversationId(newConvoId);
+
+                saveConversations([newConvo, ...prev]);
+                return [newConvo, ...prev];
             } else {
-                // Happy Path: Append to existing
-                // console.log("Appending to conversation:", activeId);
-                updated = prev.map(c => {
+                // Append to existing conversation
+                const updated = prev.map(c => {
                     if (c.id === activeId) {
                         const newMessages = [...c.messages, newMessage];
 
-                        // Update title if it was "New Chat" or empty
+                        // Update title if empty
                         const title = (c.messages.length === 0 || c.title === 'New Chat') && role === 'user'
                             ? content.substring(0, 30) + (content.length > 30 ? '...' : '')
                             : c.title;
@@ -236,10 +236,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     }
                     return c;
                 });
-            }
 
-            saveConversations(updated);
-            return updated;
+                saveConversations(updated);
+                return updated;
+            }
         });
     };
 
@@ -255,6 +255,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     };
 
     const startNewConversation = () => {
+        // Create a new empty conversation immediately
         const newConvo: Conversation = {
             id: generateId(),
             title: 'New Chat',
@@ -262,12 +263,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             createdAt: new Date(),
             suggestedQuestion: null
         };
+
+        // Update ID first, then add conversation
+        updateCurrentId(newConvo.id);
+
         setConversations(prev => {
             const updated = [newConvo, ...prev];
             saveConversations(updated);
             return updated;
         });
-        updateCurrentId(newConvo.id);
     };
 
     const switchConversation = (id: string) => {

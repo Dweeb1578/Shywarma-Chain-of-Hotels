@@ -1,9 +1,8 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { Groq } from "groq-sdk";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { CohereEmbeddings } from "@langchain/cohere";
-import { PineconeStore } from "@langchain/pinecone";
+import { getCoordinates, getWeather, getWeatherDescription } from "@/lib/weather";
+import { destinations } from "@/data/destinations"; // Import destinations to check against user query
 import { logChatInteraction } from "@/lib/supabase";
 
 // Initialize clients ONCE (singleton pattern)
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
 
         // Hash query for cache key
         const queryHash = crypto.createHash('md5').update(userQuery.toLowerCase().trim()).digest('hex');
-        const cacheKey = `chat:context:${queryHash}`;
+        const cacheKey = `chat: context:${queryHash} `;
 
         let context: string | null = null;
 
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
             try {
                 const cached = await redis.get(cacheKey);
                 if (cached) {
-                    console.log(`[CACHE HIT] Redis Key: ${cacheKey}`);
+                    console.log(`[CACHE HIT] Redis Key: ${cacheKey} `);
                     context = cached;
                 }
             } catch (err) {
@@ -72,11 +71,11 @@ export async function POST(req: NextRequest) {
             const index = pinecone.Index(PINECONE_INDEX_NAME);
             const queryResponse = await index.query({
                 vector: queryVector,
-                topK: 3,
+                topK: 5, // Reduced from 8 for faster response times
                 includeMetadata: true
             });
 
-            console.log(`[PINECONE] Matches Found: ${queryResponse.matches.length}`);
+            console.log(`[PINECONE] Matches Found: ${queryResponse.matches.length} `);
 
             // 3. Extract Context
             context = queryResponse.matches
@@ -84,7 +83,7 @@ export async function POST(req: NextRequest) {
                 .filter((text: string) => text.length > 0)
                 .join("\n\n---\n\n");
 
-            console.log(`[SEARCH + EMBED] ${Date.now() - searchStart}ms`);
+            console.log(`[SEARCH + EMBED] ${Date.now() - searchStart} ms`);
 
             // Save to Redis (7 days TTL)
             if (redis) {
@@ -96,47 +95,126 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 3. Construct System Prompt (Static part for Caching)
+        // 3. Weather Integration
+        const weatherPromises = destinations
+            .filter(d => userQuery.toLowerCase().includes(d.name.toLowerCase()))
+            .map(async (d) => {
+                const coords = await getCoordinates(d.name);
+                if (coords) {
+                    const weather = await getWeather(coords.lat, coords.lon);
+                    if (weather && weather.current) {
+                        const desc = getWeatherDescription(weather.current.weather_code);
+                        // Get daily forecast if available
+                        let forecastStr = "";
+                        if (weather.daily) {
+                            forecastStr = "\nForecast:\n" + weather.daily.time.slice(0, 5).map((t: string, i: number) =>
+                                `- ${t}: ${getWeatherDescription(weather.daily.weather_code[i])}, Max: ${weather.daily.temperature_2m_max[i]}°C, Min: ${weather.daily.temperature_2m_min[i]}°C`
+                            ).join("\n");
+                        }
+                        return `CURRENT WEATHER in ${d.name.toUpperCase()}: \nTemp: ${weather.current.temperature_2m}°C, Condition: ${desc}${forecastStr} `;
+                    }
+                }
+                return null;
+            });
+
+        const weatherResults = await Promise.all(weatherPromises);
+        const weatherContext = weatherResults.filter(Boolean).join("\n\n");
+
+        if (weatherContext) {
+            context = (context ? context + "\n\n---\n\n" : "") + weatherContext;
+        }
+
+        // 4. Construct System Prompt (Static part for Caching)
         const staticSystemPrompt = `You are Shyla, the personal AI Travel Concierge for Shywarma Hotels.
+            
+            ABSOLUTE RULE - NO HALLUCINATIONS:
+            - You may ONLY mention hotels, packages, destinations, prices, and amenities that are EXPLICITLY written in the CONTEXT section below.
+            - If a hotel name or detail is NOT in the CONTEXT, you MUST say "I don't have that information."
+                - NEVER invent or make up hotel names, prices, or features.This is critical.Making up information is a failure.
+            
+            KNOWN DESTINATIONS(CRITICAL - You MUST mention ALL 5 destinations when asked, never skip any):
+            - ** Maldives ** - Paradise on Earth, overwater villas
+                - ** Santorini ** - Greek island, caldera views, sunsets
+                    - ** Dubai ** - Luxury city, desert adventures, shopping
+                        - ** Bali ** - Island of the Gods, temples, rice terraces
+                            - ** Paris ** - City of Light & Love, art, gastronomy
+            IMPORTANT: When asked about destinations, ALWAYS list ALL FIVE above. Missing any is a critical error.
 
-CRITICAL RULE: ONLY mention things from the CONTEXT below. If something is NOT in the context at all, say "I don't have that information." But if you FOUND an answer, just give it - NO disclaimers like "I don't have info about other destinations" or "that's all I have".
-
-PERSONA:
-- Warm, friendly, and CONFIDENT. Never use uncertain phrases like "I think", "might be", "perhaps".
-- Be direct: "This is..." not "I think this might be..."
-- Use "I" and "we"
-
-INSTRUCTIONS:
-1. FORMATTING IS CRITICAL:
-   - Use **bold** for EVERY hotel, destination, or package name. Example: **Azure Lagoon Resort**.
-   - SEPARATE paragraphs with a BLANK LINE (double newline). This splits the message into bubbles.
-2. BE CONCISE: 2-3 sentences max per paragraph.
-3. GROUNDING: ONLY use info from the CONTEXT provided.
-4. SUGGESTED_QUESTION RULE (REQUIRED):
-   You MUST end your response with this exact format:
-   SUGGESTED_QUESTION: [Your suggestion here]
-   
-   The suggestion MUST be a question the USER would ask (e.g., "Tell me about prices", "Show me photos").
-   NEVER ask the user a question directly.
-   Example: "SUGGESTED_QUESTION: What are the room rates?"`;
-
-        // 4. Call Groq API with headers access
-        const { data: chatCompletion, response: rawResponse } = await groq.chat.completions.create({
-            messages: [
-                { role: "system", content: staticSystemPrompt }, // Static prefix = CACHE HIT
+            WEATHER CONTEXT:
+            The user has provided real-time weather data. You MUST use the specific DATES provided in the weather context when generating the itinerary.
+            If weather says "Forecast for Oct 12", your itinerary Day 1 must be "Oct 12".
+            
+                PERSONA:
+            - Warm, friendly, and CONFIDENT.Never use uncertain phrases like "I think", "might be", "perhaps".
+            - Be direct: "This is..." not "I think this might be..."
+                    - Use "I" and "we"
+            
+            MANDATORY FORMATTING RULES:
+            1. Use ** bold ** for EVERY hotel, destination, or package name.Example: ** Azure Lagoon Resort **.
+            2. DO NOT use numbered lists(1. 2. 3.).Instead, write each item as its own paragraph separated by blank lines.
+            3. PARAGRAPH BREAKS: After EVERY item or 1 - 2 sentences, insert TWO blank lines.
+            4. BE CONCISE: 2 - 3 sentences max per response section.
+            
+            ITINERARY GENERATION RULE(CRITICAL):
+            If the user asks for an "itinerary", "plan", or "schedule", OR asks to "update", "change", or "edit" the current plan, you MUST OUTPUT A NEW JSON BLOCK for the itinerary at the end of your text response.
+            You must RE-PRINT the entire updated JSON structure. Do not just describe changes.
+                Format:
+                \`\`\`json
                 {
-                    role: "user",
-                    content: `CONTEXT FROM KNOWLEDGE BASE:\n${context}\n\n---\nUSER QUESTION: ${lastMessage.content}`
-                } // Dynamic suffix
-            ],
+                  "title": "3 Days in Paris",
+                  "days": [
+                    { 
+                      "day": 1, 
+                      "date": "Oct 12, 2025",
+                      "title": "Arrival & Art", 
+                      "activities": [
+                        { "time": "10:00 AM", "description": "Check-in at Le Maison Royale and freshen up.", "distance": "2km from airport" },
+                        { "time": "02:00 PM", "description": "Visit Louvre Museum to see the Mona Lisa.", "distance": "500m walk" },
+                        { "time": "08:00 PM", "description": "Dinner at Seine Cruise with live music.", "distance": "1km from hotel" }
+                      ] 
+                    }
+                  ]
+                }
+                \`\`\`
+            DO NOT print the JSON inside the text flow. Print it as a separate code block at the VERY END.
+            
+            CRITICAL - SUGGESTED QUESTION (ALWAYS REQUIRED):
+            You MUST ALWAYS end EVERY response with exactly this format on its own line:
+            SUGGESTED_QUESTION: [a follow-up question]
+            
+            Example ending: "...wonderful amenities.\n\nSUGGESTED_QUESTION: What are the room rates?"
+            Failing to include SUGGESTED_QUESTION is a critical error. NEVER forget it.`;
+
+        // 4. Construct Groq Messages
+        const groqMessages: any[] = [
+            { role: "system", content: staticSystemPrompt }, // Static prefix = CACHE HIT
+            {
+                role: "user",
+                content: `CONTEXT FROM KNOWLEDGE BASE: \n${context} \n\n-- -\nUSER QUESTION: ${lastMessage.content}`
+            }
+        ];
+
+        // 5. Intent Detection & Reinforcement
+        // If the user wants a plan, we FORCE the model to pay attention to the JSON rule
+        // by appending a fresh system instruction at the end.
+        if (/itinerary|plan|schedule|trip/i.test(lastMessage.content)) {
+            groqMessages.push({
+                role: "system",
+                content: "CRITICAL: The user is asking for a travel plan. You MUST include the defined JSON itinerary block at the end of your response."
+            });
+        }
+
+        // 6. Call Groq API
+        const { data: chatCompletion, response: rawResponse } = await groq.chat.completions.create({
+            messages: groqMessages,
             model: "llama-3.1-8b-instant", // Best rate limits: 14.4K RPD
-            temperature: 0.5,
-            max_tokens: 600,
+            temperature: 0.3, // Lower for more consistent instruction following
+            max_tokens: 800, // Increased to ensure SUGGESTED_QUESTION isn't cut off
             stream: true, // We want streaming
         }).withResponse();
 
         const region = rawResponse.headers.get("x-groq-region");
-        console.log(`[GROQ] Region: ${region}`);
+        console.log(`[GROQ] Region: ${region} `);
 
         // 5. Stream Response
         // Next.js App Router streaming text response
@@ -170,9 +248,9 @@ INSTRUCTIONS:
                     const clientLatency = (Date.now() - clientStart) / 1000; // seconds
                     const networkOverhead = clientLatency - serverLatency;
 
-                    console.log(`[PERF] Client Latency: ${clientLatency.toFixed(2)}s`);
-                    console.log(`[PERF] Server Latency: ${serverLatency.toFixed(2)}s`);
-                    console.log(`[PERF] Network Overhead: ${networkOverhead.toFixed(2)}s`);
+                    console.log(`[PERF] Client Latency: ${clientLatency.toFixed(2)} s`);
+                    console.log(`[PERF] Server Latency: ${serverLatency.toFixed(2)} s`);
+                    console.log(`[PERF] Network Overhead: ${networkOverhead.toFixed(2)} s`);
 
                     // Log to Supabase after stream completes
                     const responseTimeMs = Date.now() - startTime;

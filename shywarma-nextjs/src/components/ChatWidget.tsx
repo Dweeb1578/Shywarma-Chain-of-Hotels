@@ -8,6 +8,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import HotelCarousel from './HotelCarousel';
 
+import { AnimatePresence } from "framer-motion";
+import ItineraryCanvas from "./ItineraryCanvas";
+
 export default function ChatWidget() {
     const {
         messages,
@@ -24,15 +27,52 @@ export default function ChatWidget() {
         setSuggestedQuestion
     } = useChat();
     const [input, setInput] = useState("");
-    // Removed local suggestedQuestion state
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+
+    // State for Itinerary Canvas
+    const [itinerary, setItinerary] = useState<any | null>(null);
+    const [showItinerary, setShowItinerary] = useState(false);
+
+    // Effect to parse itinerary JSON from the LAST message
+    // Track the last message ID we've already processed for itinerary to avoid infinite loops
+    const processedMsgIdRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant') {
+            // If we already processed this exact message, DO NOT re-open the overlay
+            if (lastMsg.id === processedMsgIdRef.current) return;
+
+            const jsonMatch = lastMsg.content.match(/```json\n([\s\S]*?)\n```/);
+            if (jsonMatch) {
+                try {
+                    const parsed = JSON.parse(jsonMatch[1]);
+                    if (parsed.days && parsed.title) {
+                        setItinerary(parsed);
+                        // Auto-open DISABLED per user request
+                        // setShowItinerary(true);
+
+                        // Mark this message as processed
+                        processedMsgIdRef.current = lastMsg.id;
+                    }
+                } catch (e) {
+                    console.error("Failed to parse itinerary JSON", e);
+                }
+            }
+        }
+    }, [messages]); // Remove showItinerary from dependency to prevent loop
 
     // FAB tooltip after 4s
     const [showTooltip, setShowTooltip] = useState(false);
 
     // Speech-to-text
     const [isListening, setIsListening] = useState(false);
+
+    // Escalation Banner (after N messages)
+    const [escalationDismissed, setEscalationDismissed] = useState(false);
+    const ESCALATION_THRESHOLD = 4; // Show banner after 4 messages
+    const showEscalationBanner = messages.length >= ESCALATION_THRESHOLD && !escalationDismissed;
 
     // Quick suggestions for empty state
     const quickSuggestions = [
@@ -213,6 +253,8 @@ export default function ChatWidget() {
             // Extract suggested question if present
             let finalBotText = botText;
             const suggestionMarker = "SUGGESTED_QUESTION:";
+            let foundSuggestion = false;
+
             if (botText.includes(suggestionMarker)) {
                 const parts = botText.split(suggestionMarker);
                 finalBotText = parts[0].trim();
@@ -220,35 +262,85 @@ export default function ChatWidget() {
                 let suggestion = parts[1].trim().replace(/\*\*/g, '');
                 if (suggestion) {
                     setSuggestedQuestion(suggestion);
+                    foundSuggestion = true;
                 }
+            }
+
+            // FALLBACK: Generate default suggestion if LLM didn't provide one
+            if (!foundSuggestion) {
+                const lowerInput = textToSend.toLowerCase();
+                let fallbackSuggestion = "Tell me about your packages";
+
+                if (lowerInput.includes("destination") || lowerInput.includes("where")) {
+                    fallbackSuggestion = "What packages do you offer?";
+                } else if (lowerInput.includes("hotel") || lowerInput.includes("stay")) {
+                    fallbackSuggestion = "What are the room rates?";
+                } else if (lowerInput.includes("honeymoon") || lowerInput.includes("romantic")) {
+                    fallbackSuggestion = "Show me honeymoon packages";
+                } else if (lowerInput.includes("package") || lowerInput.includes("deal")) {
+                    fallbackSuggestion = "What's included in the package?";
+                } else if (lowerInput.includes("price") || lowerInput.includes("cost")) {
+                    fallbackSuggestion = "Are there any special offers?";
+                }
+
+                setSuggestedQuestion(fallbackSuggestion);
             }
 
             // Linkify hotel and destination names
             destinations.forEach(dest => {
-                // Linkify Hotel Names (Longer matches first)
-                dest.hotels.forEach(hotel => {
-                    // Escape special characters in name for regex
-                    const safeName = hotel.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    // Match with or without bold markers, case insensitive
-                    const hotelRegex = new RegExp(`(\\*\\*)?${safeName}(\\*\\*)?`, 'gi');
+                // 1. Linkify Package Names (Most specific/longest)
+                dest.packages.forEach(pkg => {
+                    const safePkgName = pkg.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // Match name surrounded by optional ** and/or whitespace
+                    // This handles cases like "**Name**", "**Name", "Name**", or just "Name"
+                    const pkgRegex = new RegExp(`(?:\\*\\*|\\s)*${safePkgName}(?:\\*\\*|\\s)*`, 'gi');
 
-                    finalBotText = finalBotText.replace(hotelRegex, (match) => {
-                        // Avoid replacing inside existing links [Name](url)
-                        // This simple check prevents replacing the text part of an already generated link
+                    finalBotText = finalBotText.replace(pkgRegex, (match) => {
                         if (match.includes('](')) return match;
-                        return `[${hotel.name}](/destinations/${dest.slug}/${hotel.slug})`;
+                        // Determine if we need leading space based on match match
+                        const prefix = match.match(/^\s+/)?.[0] || '';
+                        const suffix = match.match(/\s+$/)?.[0] || '';
+                        return `${prefix}[${pkg.name}](/packages)${suffix}`;
                     });
                 });
 
-                // Linkify Destination Name
+                // 2. Linkify Hotel Names 
+                dest.hotels.forEach(hotel => {
+                    const safeName = hotel.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const hotelRegex = new RegExp(`(?:\\*\\*|\\s)*${safeName}(?:\\*\\*|\\s)*`, 'gi');
+
+                    finalBotText = finalBotText.replace(hotelRegex, (match) => {
+                        if (match.includes('](')) return match;
+                        const prefix = match.match(/^\s+/)?.[0] || '';
+                        const suffix = match.match(/\s+$/)?.[0] || '';
+                        return `${prefix}[${hotel.name}](/destinations/${dest.slug}/${hotel.slug})${suffix}`;
+                    });
+                });
+
+                // 3. Linkify Destination Name (Least specific)
                 const safeDestName = dest.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const destRegex = new RegExp(`(\\*\\*)?${safeDestName}(\\*\\*)?`, 'gi');
+                // Use word boundary \b to prevent matching "Paris" inside "Parisian"
+                // But \b doesn't work well with **. 
+                // We'll rely on the fact that longer matches (packages) are already done.
+                // But we should still be careful.
+                const destRegex = new RegExp(`(?:\\*\\*|\\s)*\\b${safeDestName}\\b(?:\\*\\*|\\s)*`, 'gi');
 
                 finalBotText = finalBotText.replace(destRegex, (match) => {
                     if (match.includes('](') || match.includes('/destinations/')) return match;
-                    return `[${dest.name}](/destinations/${dest.slug})`;
+                    const prefix = match.match(/^\s+/)?.[0] || '';
+                    const suffix = match.match(/\s+$/)?.[0] || '';
+                    return `${prefix}[${dest.name}](/destinations/${dest.slug})${suffix}`;
                 });
             });
+
+            // POST-PROCESS: Insert line breaks before destination links in listings
+            // Match pattern: " - Description [NextDestination]"
+            const destNames = destinations.map(d => d.name).join('|');
+            // We match the " - Description" part and the following "[DestName]"
+            // We use a lookahead or just match enough to identify the split point, 
+            // but effectively we want to turn "...desc [Dest]" into "...desc\n\n[Dest]"
+            const listingPattern = new RegExp(`(\\s*-\\s*[^[\\]]+?)\\s*(\\[(?:${destNames})\\])`, 'g');
+            finalBotText = finalBotText.replace(listingPattern, '$1\n\n$2');
 
             // Add final full message
             setStreamingText(null);
@@ -290,6 +382,24 @@ export default function ChatWidget() {
                                 <h4>Shyla</h4>
                             </div>
                             <div className={styles.headerActions}>
+                                {/* Permanent Contact Links */}
+                                <a
+                                    href="https://wa.me/919963894342"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles.headerContactBtn}
+                                    title="Chat on WhatsApp"
+                                >
+                                    💬
+                                </a>
+                                <a
+                                    href="tel:+919963894342"
+                                    className={styles.headerContactBtn}
+                                    title="Call Support"
+                                >
+                                    📞
+                                </a>
+
                                 <button
                                     className={styles.newChatBtn}
                                     onClick={startNewConversation}
@@ -350,37 +460,47 @@ export default function ChatWidget() {
                                         </button>
                                     ))}
                                 </div>
-
-                                <div className={styles.escalationActions}>
-                                    <p className={styles.escalationTitle}>Need more help?</p>
-                                    <div className={styles.escalationButtons}>
-                                        <a
-                                            href="https://wa.me/919963894342"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={styles.whatsappActionBtn}
-                                        >
-                                            <span className={styles.btnIcon}>💬</span> Chat on WhatsApp
-                                        </a>
-                                        <a
-                                            href="tel:+919963894342"
-                                            className={styles.callActionBtn}
-                                        >
-                                            <span className={styles.btnIcon}>📞</span> Call Support
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
                         )}
                         {messages.map((msg, msgIndex) => (
                             msg.role === 'assistant' ? (
-                                // Split assistant messages into multiple bubbles
                                 <>
-                                    {msg.content.split(/\n\n+/).filter(p => p.trim()).map((paragraph, pIndex) => (
-                                        <div key={`${msg.id}-${pIndex}`} className={`${styles.message} ${styles.assistant}`}>
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph}</ReactMarkdown>
+                                    {/* Split on double newlines for separate bubbles, but FIRST strip JSON blocks if they exist */
+                                        msg.content
+                                            .replace(/```[\s\S]*?```/g, '') // Hide AGGRESSIVELY any code block
+                                            .replace(/{[\s\S]*"title":[\s\S]*"days":[\s\S]*}/, '') // Hide RAW JSON if it leaked without backticks
+                                            .split(/\n\n+/)
+                                            .filter(p => p.trim())
+                                            .map((paragraph, pIndex) => (
+                                                <div key={`${msg.id}-${pIndex}`} className={`${styles.message} ${styles.assistant}`}>
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph}</ReactMarkdown>
+                                                </div>
+                                            ))}
+
+                                    {/* Show "View Itinerary" button if this message contains the JSON */}
+                                    {(msg.content.includes("```") || msg.content.includes('"days":')) && (
+                                        <div className={styles.itineraryAction}>
+                                            <button
+                                                onClick={() => {
+                                                    // Try to match strict JSON block first
+                                                    let match = msg.content.match(/```json\n([\s\S]*?)\n```/);
+                                                    if (!match) match = msg.content.match(/```\n([\s\S]*?)\n```/); // Fallback generic block
+                                                    if (!match) match = msg.content.match(/({[\s\S]*"title":[\s\S]*"days":[\s\S]*})/); // Fallback RAW JSON
+
+                                                    if (match) {
+                                                        try {
+                                                            const parsed = JSON.parse(match[1]);
+                                                            setItinerary(parsed);
+                                                            setShowItinerary(true);
+                                                        } catch (e) { console.error(e); }
+                                                    }
+                                                }}
+                                                className={styles.viewItineraryBtn}
+                                            >
+                                                🗺️ View Custom Itinerary
+                                            </button>
                                         </div>
-                                    ))}
+                                    )}
                                     {msg.attachments && msg.attachments.length > 0 && (
                                         <div className={`${styles.message} ${styles.assistant}`}>
                                             <HotelCarousel hotels={msg.attachments.map(a => a.data)} />
@@ -397,11 +517,17 @@ export default function ChatWidget() {
                         {streamingText !== null && (
                             <>
                                 {streamingText ? (
-                                    streamingText.split(/\n\n+/).filter(p => p.trim()).map((paragraph, idx) => (
-                                        <div key={`streaming-${idx}`} className={`${styles.message} ${styles.assistant}`}>
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph + (idx === streamingText.split(/\n\n+/).length - 1 ? ' ' : '')}</ReactMarkdown>
-                                        </div>
-                                    ))
+                                    streamingText
+                                        .replace(/```[\s\S]*?```/g, '') // 1. Hide complete blocks
+                                        .replace(/```[\s\S]*/, '')      // 2. Hide incomplete blocks (from start of backticks to end)
+                                        .replace(/{[\s\S]*"title":[\s\S]*"days":[\s\S]*/, '') // 3. Hide partial/raw JSON
+                                        .split(/\n\n+/)
+                                        .filter(p => p.trim())
+                                        .map((paragraph, idx) => (
+                                            <div key={`streaming-${idx}`} className={`${styles.message} ${styles.assistant}`}>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph + (idx === streamingText.split(/\n\n+/).length - 1 ? ' ' : '')}</ReactMarkdown>
+                                            </div>
+                                        ))
                                 ) : (
                                     <div className={`${styles.message} ${styles.assistant}`}>
                                         <div className={styles.typingIndicator}>
@@ -414,6 +540,23 @@ export default function ChatWidget() {
                             </>
                         )}
                         <div ref={messagesEndRef} />
+
+                        {/* Escalation Banner - appears after 4+ messages */}
+                        {showEscalationBanner && (
+                            <div className={styles.escalationBanner}>
+                                <button
+                                    className={styles.escalationClose}
+                                    onClick={() => setEscalationDismissed(true)}
+                                    title="Dismiss"
+                                >✕</button>
+                                <p>Need more personalized help?</p>
+                                <div className={styles.escalationBannerBtns}>
+                                    <a href="https://wa.me/919963894342" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+                                    <a href="tel:+919963894342">📞 Call</a>
+                                </div>
+                            </div>
+                        )}
+
                         {suggestedQuestion && (
                             <button
                                 className={styles.suggestionChip}
@@ -453,7 +596,20 @@ export default function ChatWidget() {
                             Send
                         </button>
                     </div>
-                </div>
+                </div >
+            )
+            }
+            {/* Itinerary Canvas Overlay */}
+            {showItinerary && itinerary && (
+                <ItineraryCanvas
+                    itinerary={itinerary}
+                    onClose={() => setShowItinerary(false)}
+                    onEdit={(instruction) => {
+                        // Send edit request but keep canvas open to show loading state
+                        handleSend(`Edit this itinerary: ${instruction}`);
+                    }}
+                    isLoading={isLoading}
+                />
             )}
         </>
     );
