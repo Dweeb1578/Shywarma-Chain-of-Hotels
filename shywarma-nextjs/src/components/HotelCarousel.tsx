@@ -13,9 +13,10 @@ interface HotelCardData {
 
 interface Props {
     hotels: HotelCardData[];
+    onBook?: (hotelName: string, destination: string, price?: number) => void;
 }
 
-export default function HotelCarousel({ hotels }: Props) {
+export default function HotelCarousel({ hotels, onBook }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const router = useRouter();
 
@@ -34,6 +35,18 @@ export default function HotelCarousel({ hotels }: Props) {
         setCurrentIndex((prev) => (prev - 1 + hotels.length) % hotels.length);
     };
 
+    const handleBook = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (onBook) {
+            // Convert slug to readable destination name
+            const destName = current.destinationSlug
+                .split('-')
+                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' ');
+            onBook(current.name, destName, current.price);
+        }
+    };
+
     return (
         <div className={styles.carouselContainer}>
             <div
@@ -45,6 +58,14 @@ export default function HotelCarousel({ hotels }: Props) {
                     <h5 className={styles.hotelName}>{current.name}</h5>
                     {current.price && (
                         <div className={styles.hotelPrice}>from ₹{current.price.toLocaleString()}</div>
+                    )}
+                    {onBook && (
+                        <button
+                            onClick={handleBook}
+                            className={styles.hotelBookBtn}
+                        >
+                            Book Now
+                        </button>
                     )}
                 </div>
             </div>

@@ -99,32 +99,35 @@ export async function POST(req: NextRequest) {
             const searchStart = Date.now();
 
             // 1. Generate Embedding via Pinecone Inference (Server-Side)
+            const embedStart = Date.now();
             const embeddingResult = await pinecone.inference.embed(
                 EMBEDDING_MODEL,
                 [userQuery],
                 { inputType: 'query', truncate: 'END' }
             );
+            const embedTime = Date.now() - embedStart;
 
             const embeddingData = (embeddingResult as any).data || embeddingResult;
             const queryVector = embeddingData[0].values;
 
             // 2. Search Index using generated vector
+            const searchVectorStart = Date.now();
             const index = pinecone.Index(PINECONE_INDEX_NAME);
             const queryResponse = await index.query({
                 vector: queryVector,
                 topK: 5, // Reduced from 8 for faster response times
                 includeMetadata: true
             });
+            const searchTime = Date.now() - searchVectorStart;
 
-            console.log(`[PINECONE] Matches Found: ${queryResponse.matches.length} `);
+            console.log(`[TIMING] Embedding: ${embedTime}ms | Vector Search: ${searchTime}ms | Total RAG: ${Date.now() - searchStart}ms`);
+            console.log(`[PINECONE] Matches Found: ${queryResponse.matches.length}`);
 
             // 3. Extract Context
             context = queryResponse.matches
                 .map((match: any) => match.metadata?.text || "")
                 .filter((text: string) => text.length > 0)
                 .join("\n\n---\n\n");
-
-            console.log(`[SEARCH + EMBED] ${Date.now() - searchStart} ms`);
 
             // Save to Redis (7 days TTL)
             if (redis) {
@@ -136,33 +139,44 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // 3. Weather Integration
-        const weatherPromises = destinations
-            .filter(d => userQuery.toLowerCase().includes(d.name.toLowerCase()))
-            .map(async (d) => {
-                const coords = await getCoordinates(d.name);
-                if (coords) {
-                    const weather = await getWeather(coords.lat, coords.lon);
-                    if (weather && weather.current) {
-                        const desc = getWeatherDescription(weather.current.weather_code);
-                        // Get daily forecast if available
-                        let forecastStr = "";
-                        if (weather.daily) {
-                            forecastStr = "\nForecast:\n" + weather.daily.time.slice(0, 5).map((t: string, i: number) =>
-                                `- ${t}: ${getWeatherDescription(weather.daily.weather_code[i])}, Max: ${weather.daily.temperature_2m_max[i]}°C, Min: ${weather.daily.temperature_2m_min[i]}°C`
-                            ).join("\n");
+        // 3. Weather Integration - Only for relevant queries
+        const weatherKeywords = /weather|temperature|climate|forecast|itinerary|trip|plan|when to visit|best time|season/i;
+        const shouldFetchWeather = weatherKeywords.test(userQuery);
+
+        let weatherContext = "";
+        if (shouldFetchWeather) {
+            const weatherStart = Date.now();
+            const weatherPromises = destinations
+                .filter(d => userQuery.toLowerCase().includes(d.name.toLowerCase()))
+                .map(async (d) => {
+                    const coords = await getCoordinates(d.name);
+                    if (coords) {
+                        const weather = await getWeather(coords.lat, coords.lon);
+                        if (weather && weather.current) {
+                            const desc = getWeatherDescription(weather.current.weather_code);
+                            // Get daily forecast if available
+                            let forecastStr = "";
+                            if (weather.daily) {
+                                forecastStr = "\nForecast:\n" + weather.daily.time.slice(0, 5).map((t: string, i: number) =>
+                                    `- ${t}: ${getWeatherDescription(weather.daily.weather_code[i])}, Max: ${weather.daily.temperature_2m_max[i]}°C, Min: ${weather.daily.temperature_2m_min[i]}°C`
+                                ).join("\n");
+                            }
+                            return `CURRENT WEATHER in ${d.name.toUpperCase()}: \nTemp: ${weather.current.temperature_2m}°C, Condition: ${desc}${forecastStr} `;
                         }
-                        return `CURRENT WEATHER in ${d.name.toUpperCase()}: \nTemp: ${weather.current.temperature_2m}°C, Condition: ${desc}${forecastStr} `;
                     }
-                }
-                return null;
-            });
+                    return null;
+                });
 
-        const weatherResults = await Promise.all(weatherPromises);
-        const weatherContext = weatherResults.filter(Boolean).join("\n\n");
+            const weatherResults = await Promise.all(weatherPromises);
+            weatherContext = weatherResults.filter(Boolean).join("\n\n");
+            const weatherTime = Date.now() - weatherStart;
 
-        if (weatherContext) {
-            context = (context ? context + "\n\n---\n\n" : "") + weatherContext;
+            if (weatherContext) {
+                console.log(`[TIMING] Weather API: ${weatherTime}ms`);
+                context = (context ? context + "\n\n---\n\n" : "") + weatherContext;
+            }
+        } else {
+            console.log(`[SKIP] Weather API - not relevant for query`);
         }
 
         // 4. Construct System Prompt (Static part for Caching)
@@ -204,9 +218,18 @@ export async function POST(req: NextRequest) {
             3. Keep responses concise: 2-3 sentences per section. Do NOT insert excessive blank lines.
             4. Write as continuous paragraphs, not fragmented bullet points.
             
-            ITINERARY GENERATION RULE(CRITICAL):
-            If the user asks for an "itinerary", "plan", or "schedule", OR asks to "update", "change", or "edit" the current plan, you MUST OUTPUT A NEW JSON BLOCK for the itinerary at the end of your text response.
-            You must RE-PRINT the entire updated JSON structure.
+            ITINERARY GENERATION RULE (CRITICAL):
+            ONLY generate an itinerary JSON block if the user EXPLICITLY asks for:
+            - "itinerary", "plan a trip", "create a schedule", "plan my days", "X day trip"
+            - OR asks to "update", "change", or "edit" an existing plan
+            
+            DO NOT generate itinerary JSON for general questions like:
+            - "What places to visit?" - Just answer with text, NO JSON
+            - "What's good in Maldives?" - Just answer with text, NO JSON
+            - "Tell me about hotels" - Just answer with text, NO JSON
+            
+            If unsure, DO NOT generate the JSON block. Only generate when the user clearly wants a day-by-day plan.
+            You must RE-PRINT the entire updated JSON structure when generating or editing.
 
             ITINERARY CONTENT REQUIREMENTS (VERY IMPORTANT):
             - Each day MUST include at least ONE famous tourist attraction, landmark, or local experience OUTSIDE the hotel.
@@ -274,6 +297,7 @@ export async function POST(req: NextRequest) {
         const maxTokens = isItineraryQuery ? 1500 : 500;
 
         // 6. Call Groq API
+        const groqStart = Date.now();
         const { data: chatCompletion, response: rawResponse } = await groq.chat.completions.create({
             messages: groqMessages,
             model: "llama-3.1-8b-instant", // Best rate limits: 14.4K RPD
@@ -282,8 +306,9 @@ export async function POST(req: NextRequest) {
             stream: true, // We want streaming
         }).withResponse();
 
+        const groqTTFT = Date.now() - groqStart; // Time to first token
         const region = rawResponse.headers.get("x-groq-region");
-        console.log(`[GROQ] Region: ${region} `);
+        console.log(`[TIMING] Groq TTFT: ${groqTTFT}ms | Region: ${region} | Max Tokens: ${maxTokens}`);
 
         // 5. Stream Response
         // Next.js App Router streaming text response

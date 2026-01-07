@@ -11,6 +11,8 @@ import HotelCarousel from './HotelCarousel';
 import { AnimatePresence } from "framer-motion";
 import ItineraryCanvas from "./ItineraryCanvas";
 import { useAuth } from "@/context/AuthContext";
+import BookingModal from "./BookingModal";
+import { loadPreferences, savePreferences, updateFromQuery, UserPreferences } from "@/lib/userPreferences";
 
 export default function ChatWidget() {
     const {
@@ -36,12 +38,24 @@ export default function ChatWidget() {
     const [itinerary, setItinerary] = useState<any | null>(null);
     const [showItinerary, setShowItinerary] = useState(false);
 
+    // State for Booking Modal
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [bookingData, setBookingData] = useState<{
+        hotelName?: string;
+        destination?: string;
+        pricePerNight?: number;
+    }>({});
+
+    // User preferences state
+    const [userPrefs, setUserPrefs] = useState<UserPreferences | null>(null);
+
     // LocalStorage key for persisting itinerary
     const ITINERARY_STORAGE_KEY = 'shywarma_last_itinerary';
 
-    // Load saved itinerary on mount
+    // Load saved itinerary and preferences on mount
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            // Load itinerary
             const saved = localStorage.getItem(ITINERARY_STORAGE_KEY);
             if (saved) {
                 try {
@@ -53,6 +67,10 @@ export default function ChatWidget() {
                     console.error("Failed to load saved itinerary", e);
                 }
             }
+
+            // Load user preferences
+            const prefs = loadPreferences();
+            setUserPrefs(prefs);
         }
     }, []);
 
@@ -180,6 +198,12 @@ export default function ChatWidget() {
         handleSend(query);
     };
 
+    // Helper to open booking modal with hotel data
+    const openBooking = (hotelName: string, destination: string, pricePerNight?: number) => {
+        setBookingData({ hotelName, destination, pricePerNight });
+        setShowBookingModal(true);
+    };
+
     const [streamingText, setStreamingText] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -206,6 +230,13 @@ export default function ChatWidget() {
 
         // Add user message immediately
         addMessage("user", textToSend);
+
+        // Update user preferences based on query
+        if (userPrefs) {
+            const updatedPrefs = updateFromQuery(textToSend, userPrefs);
+            setUserPrefs(updatedPrefs);
+            savePreferences(updatedPrefs);
+        }
 
         try {
             // Hybrid Approach: Check for keywords first for guaranteed UI cards
@@ -618,7 +649,10 @@ export default function ChatWidget() {
                                     })()}
                                     {msg.attachments && msg.attachments.length > 0 && (
                                         <div className={`${styles.message} ${styles.assistant}`}>
-                                            <HotelCarousel hotels={msg.attachments.map(a => a.data)} />
+                                            <HotelCarousel
+                                                hotels={msg.attachments.map(a => a.data)}
+                                                onBook={openBooking}
+                                            />
                                         </div>
                                     )}
                                 </React.Fragment>
@@ -798,6 +832,14 @@ export default function ChatWidget() {
                     isLoading={isLoading}
                 />
             )}
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={() => setShowBookingModal(false)}
+                hotelName={bookingData.hotelName}
+                destination={bookingData.destination}
+                pricePerNight={bookingData.pricePerNight}
+            />
         </>
     );
 }
