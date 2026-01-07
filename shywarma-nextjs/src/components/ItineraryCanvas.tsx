@@ -106,7 +106,7 @@ export default function ItineraryCanvas({ itinerary, onClose, onEdit, isLoading 
                                                 {act.distance && <span className={styles.actDist}>{act.distance}</span>}
                                             </div>
                                             <div className={styles.actContent}>
-                                                <p>{act.description}</p>
+                                                <p>{act.description.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')}</p>
                                             </div>
                                         </li>
                                     ))}

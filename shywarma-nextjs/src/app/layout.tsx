@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ChatProvider } from "@/context/ChatContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -22,12 +23,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
             <body className={`${inter.variable} ${playfair.variable}`}>
-                <ChatProvider>
-                    <Navbar />
-                    {children}
-                    <Footer />
-                    <Analytics />
-                </ChatProvider>
+                <AuthProvider>
+                    <ChatProvider>
+                        <Navbar />
+                        {children}
+                        <Footer />
+                        <Analytics />
+                    </ChatProvider>
+                </AuthProvider>
             </body>
         </html>
     );

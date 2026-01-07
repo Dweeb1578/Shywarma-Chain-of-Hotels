@@ -165,10 +165,25 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         updateCurrentId(newConvo.id);
     };
 
-    // Save to localStorage
+    // Save to localStorage - strip itinerary data to prevent cache bloat
     const saveConversations = (convos: Conversation[]) => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(convos));
+            // Strip itinerary JSON from messages before saving
+            const cleanedConvos = convos.map(convo => ({
+                ...convo,
+                messages: convo.messages.map(msg => ({
+                    ...msg,
+                    content: msg.role === 'assistant'
+                        ? msg.content
+                            .replace(/<ITINERARY_DATA>[\s\S]*?<\/ITINERARY_DATA>/g, '')
+                            .replace(/```json[\s\S]*?```/g, '')
+                            .replace(/```[\s\S]*?```/g, '')
+                            .replace(/\{[\s\S]*"title"[\s\S]*"days"[\s\S]*\}/g, '')
+                            .trim()
+                        : msg.content
+                }))
+            }));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedConvos));
         }
     };
 

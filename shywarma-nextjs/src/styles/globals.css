@@ -100,3 +100,45 @@ main {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--heirloom-gold);
 }
+
+/* Print Styles - Hide everything except itinerary canvas */
+@media print {
+
+    /* Hide all main page content */
+    body>*:not([class*="overlay"]) {
+        display: none !important;
+    }
+
+    /* But show the itinerary overlay/portal content */
+    body {
+        background: white !important;
+        overflow: visible !important;
+    }
+
+    /* Hide navbar, footer, chat widget, FAB button */
+    nav,
+    footer,
+    [class*="ChatWidget"],
+    [class*="fab"],
+    [class*="chatBox"],
+    [class*="Navbar"],
+    [class*="Footer"],
+    main {
+        display: none !important;
+    }
+
+    /* Ensure portal content (itinerary) is visible */
+    [class*="overlay"] {
+        display: block !important;
+        position: static !important;
+        background: white !important;
+    }
+
+    [class*="canvasContainer"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+}

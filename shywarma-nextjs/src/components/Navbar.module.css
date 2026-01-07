@@ -158,6 +158,41 @@
     box-shadow: 0 8px 20px rgba(197, 160, 89, 0.35);
 }
 
+.userInfo {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #C5A059;
+}
+
+.avatarPlaceholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C5A059, #D4AF6A);
+    color: #1C1917;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.loadingText {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.scrolled .loadingText {
+    color: #1C1917;
+}
+
 .mobileMenuBtn {
     display: none;
 }

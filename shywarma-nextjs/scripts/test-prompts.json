@@ -1,0 +1,119 @@
+[
+    {
+        "id": "destinations",
+        "prompt": "What destinations do you offer?",
+        "expectedKeywords": [
+            "Maldives",
+            "Santorini",
+            "Dubai",
+            "Bali",
+            "Paris"
+        ],
+        "minKeywords": 5,
+        "category": "coverage"
+    },
+    {
+        "id": "maldives_hotels",
+        "prompt": "What hotels do you have in Maldives?",
+        "expectedKeywords": [
+            "Azure Lagoon",
+            "Coral Haven"
+        ],
+        "minKeywords": 1,
+        "category": "accuracy"
+    },
+    {
+        "id": "dubai_itinerary",
+        "prompt": "Plan a 3 day trip to Dubai starting tomorrow",
+        "expectedKeywords": [
+            "ITINERARY_DATA",
+            "Burj Khalifa",
+            "Dubai Mall"
+        ],
+        "minKeywords": 2,
+        "expectsItinerary": true,
+        "category": "itinerary"
+    },
+    {
+        "id": "bali_packages",
+        "prompt": "What travel packages do you offer for Bali?",
+        "expectedKeywords": [
+            "package",
+            "Bali",
+            "Temple"
+        ],
+        "minKeywords": 2,
+        "category": "packages"
+    },
+    {
+        "id": "paris_romantic",
+        "prompt": "I want a romantic honeymoon trip to Paris",
+        "expectedKeywords": [
+            "Paris",
+            "romantic",
+            "Eiffel"
+        ],
+        "minKeywords": 2,
+        "category": "recommendations"
+    },
+    {
+        "id": "santorini_weather",
+        "prompt": "What's the weather like in Santorini?",
+        "expectedKeywords": [
+            "Santorini",
+            "weather",
+            "temperature"
+        ],
+        "minKeywords": 2,
+        "category": "weather"
+    },
+    {
+        "id": "budget_trip",
+        "prompt": "What's the cheapest room you have?",
+        "expectedKeywords": [
+            "₹",
+            "room",
+            "night"
+        ],
+        "minKeywords": 2,
+        "category": "pricing"
+    },
+    {
+        "id": "suggested_question",
+        "prompt": "Tell me about your luxury resorts",
+        "expectedKeywords": [
+            "SUGGESTED_QUESTION"
+        ],
+        "minKeywords": 1,
+        "category": "format"
+    },
+    {
+        "id": "hallucination_test",
+        "prompt": "Do you have hotels in Tokyo?",
+        "mustNotContain": [
+            "Tokyo Imperial",
+            "Tokyo Grand",
+            "our hotel in Tokyo"
+        ],
+        "expectedKeywords": [
+            "don't have",
+            "not available",
+            "five destinations"
+        ],
+        "minKeywords": 0,
+        "category": "hallucination"
+    },
+    {
+        "id": "5day_itinerary",
+        "prompt": "Create a detailed 5 day itinerary for Maldives",
+        "expectedKeywords": [
+            "ITINERARY_DATA",
+            "Day 5",
+            "Maldives"
+        ],
+        "minKeywords": 2,
+        "expectsItinerary": true,
+        "expectedDays": 5,
+        "category": "itinerary"
+    }
+]

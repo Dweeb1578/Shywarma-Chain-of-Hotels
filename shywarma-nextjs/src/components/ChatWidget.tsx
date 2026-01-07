@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "@/context/ChatContext";
 import styles from "./ChatWidget.module.css";
 import { destinations } from "@/data/destinations";
@@ -10,6 +10,7 @@ import HotelCarousel from './HotelCarousel';
 
 import { AnimatePresence } from "framer-motion";
 import ItineraryCanvas from "./ItineraryCanvas";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ChatWidget() {
     const {
@@ -26,6 +27,7 @@ export default function ChatWidget() {
         suggestedQuestion,
         setSuggestedQuestion
     } = useChat();
+    const { user } = useAuth();
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
@@ -33,6 +35,33 @@ export default function ChatWidget() {
     // State for Itinerary Canvas
     const [itinerary, setItinerary] = useState<any | null>(null);
     const [showItinerary, setShowItinerary] = useState(false);
+
+    // LocalStorage key for persisting itinerary
+    const ITINERARY_STORAGE_KEY = 'shywarma_last_itinerary';
+
+    // Load saved itinerary on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem(ITINERARY_STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.title && parsed.days) {
+                        setItinerary(parsed);
+                    }
+                } catch (e) {
+                    console.error("Failed to load saved itinerary", e);
+                }
+            }
+        }
+    }, []);
+
+    // Save itinerary to localStorage whenever it changes
+    useEffect(() => {
+        if (typeof window !== 'undefined' && itinerary) {
+            localStorage.setItem(ITINERARY_STORAGE_KEY, JSON.stringify(itinerary));
+        }
+    }, [itinerary]);
 
     // Effect to parse itinerary JSON from the LAST message
     // Track the last message ID we've already processed for itinerary to avoid infinite loops
@@ -223,7 +252,8 @@ export default function ChatWidget() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    messages: [...messages, { role: "user", content: textToSend }]
+                    messages: [...messages, { role: "user", content: textToSend }],
+                    userId: user?.email || user?.id || null
                 }),
             });
 
@@ -342,6 +372,29 @@ export default function ChatWidget() {
             const listingPattern = new RegExp(`(\\s*-\\s*[^[\\]]+?)\\s*(\\[(?:${destNames})\\])`, 'g');
             finalBotText = finalBotText.replace(listingPattern, '$1\n\n$2');
 
+            // EXTRACT AND SAVE ITINERARY from the response BEFORE the message is saved (and stripped)
+            const itineraryXmlMatch = botText.match(/<ITINERARY_DATA>([\s\S]*?)<\/ITINERARY_DATA>/);
+            if (itineraryXmlMatch) {
+                try {
+                    let jsonStr = itineraryXmlMatch[1].trim();
+                    let parsed;
+                    try {
+                        parsed = JSON.parse(jsonStr);
+                    } catch {
+                        // Clean up the JSON if initial parse fails
+                        jsonStr = jsonStr.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+                        parsed = JSON.parse(jsonStr);
+                    }
+                    if (parsed.title && parsed.days) {
+                        setItinerary(parsed);
+                        // Also save to localStorage immediately
+                        localStorage.setItem('shywarma_last_itinerary', JSON.stringify(parsed));
+                    }
+                } catch (e) {
+                    console.error("Failed to extract itinerary from response:", e);
+                }
+            }
+
             // Add final full message
             setStreamingText(null);
             addMessage("assistant", finalBotText, attachments);
@@ -400,13 +453,6 @@ export default function ChatWidget() {
                                     📞
                                 </a>
 
-                                <button
-                                    className={styles.newChatBtn}
-                                    onClick={startNewConversation}
-                                    title="New Chat"
-                                >
-                                    ✚
-                                </button>
                                 {messages.length > 0 && (
                                     <button
                                         className={styles.clearBtn}
@@ -414,15 +460,6 @@ export default function ChatWidget() {
                                         title="Clear Chat"
                                     >
                                         🧹
-                                    </button>
-                                )}
-                                {currentConversationId && conversations.length > 0 && (
-                                    <button
-                                        className={styles.clearBtn}
-                                        onClick={() => deleteConversation(currentConversationId)}
-                                        title="Delete Chat"
-                                    >
-                                        🗑
                                     </button>
                                 )}
                                 <button
@@ -434,19 +471,6 @@ export default function ChatWidget() {
                                 </button>
                             </div>
                         </div>
-                        {conversations.length > 1 && (
-                            <select
-                                className={styles.conversationSelect}
-                                value={currentConversationId || ''}
-                                onChange={(e) => switchConversation(e.target.value)}
-                            >
-                                {conversations.map(c => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.title || 'New Chat'}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
                     </div>
                     <div className={styles.messages}>
                         {messages.length === 0 && !isLoading && (
@@ -464,49 +488,140 @@ export default function ChatWidget() {
                         )}
                         {messages.map((msg, msgIndex) => (
                             msg.role === 'assistant' ? (
-                                <>
-                                    {/* Split on double newlines for separate bubbles, but FIRST strip JSON blocks if they exist */
-                                        msg.content
-                                            .replace(/```[\s\S]*?```/g, '') // Hide AGGRESSIVELY any code block
-                                            .replace(/{[\s\S]*"title":[\s\S]*"days":[\s\S]*}/, '') // Hide RAW JSON if it leaked without backticks
+                                <React.Fragment key={msg.id || `msg-${msgIndex}`}>
+                                    {/* Process and render visible content only */}
+                                    {(() => {
+                                        // Clean the content completely
+                                        const cleanedContent = msg.content
+                                            .replace(/<ITINERARY_DATA>[\s\S]*?<\/ITINERARY_DATA>/g, '')
+                                            .replace(/<ITINERARY_DATA>[\s\S]*/g, '') // Catch incomplete opening tags
+                                            .replace(/<\/?ITINERARY_DATA[^>]*>/g, '') // Catch any remaining tag fragments
+                                            .replace(/```[\s\S]*?```/g, '')
+                                            .replace(/```[\s\S]*/g, '') // Catch incomplete code blocks
+                                            .replace(/\{[\s\S]*"title"[\s\S]*"days"[\s\S]*\}/g, '')
+                                            .replace(/\{\s*"time"\s*:[\s\S]*/g, '') // Catch partial itinerary JSON objects
+                                            .replace(/,\s*\{\s*"time"\s*:/g, '') // Catch trailing activity objects
+                                            .replace(/SUGGESTED_QUESTION:.*$/gm, '')
+                                            .trim();
+
+                                        // Split into paragraphs
+                                        const paragraphs = cleanedContent
                                             .split(/\n\n+/)
-                                            .filter(p => p.trim())
-                                            .map((paragraph, pIndex) => (
-                                                <div key={`${msg.id}-${pIndex}`} className={`${styles.message} ${styles.assistant}`}>
-                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph}</ReactMarkdown>
-                                                </div>
-                                            ))}
+                                            .map(p => p.trim())
+                                            .filter(p => {
+                                                // Must have actual visible text content
+                                                if (!p) return false;
+                                                if (p === 'SUGGESTED_QUESTION:') return false;
+                                                // Check if it's just whitespace or special chars
+                                                if (!/[a-zA-Z0-9]/.test(p)) return false;
+                                                return true;
+                                            });
 
-                                    {/* Show "View Itinerary" button if this message contains the JSON */}
-                                    {(msg.content.includes("```") || msg.content.includes('"days":')) && (
-                                        <div className={styles.itineraryAction}>
-                                            <button
-                                                onClick={() => {
-                                                    // Try to match strict JSON block first
-                                                    let match = msg.content.match(/```json\n([\s\S]*?)\n```/);
-                                                    if (!match) match = msg.content.match(/```\n([\s\S]*?)\n```/); // Fallback generic block
-                                                    if (!match) match = msg.content.match(/({[\s\S]*"title":[\s\S]*"days":[\s\S]*})/); // Fallback RAW JSON
+                                        // If no visible paragraphs, render nothing
+                                        if (paragraphs.length === 0) return null;
 
-                                                    if (match) {
-                                                        try {
-                                                            const parsed = JSON.parse(match[1]);
-                                                            setItinerary(parsed);
+                                        return paragraphs.map((paragraph, pIndex) => (
+                                            <div key={`${msg.id}-p-${pIndex}`} className={`${styles.message} ${styles.assistant}`}>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph}</ReactMarkdown>
+                                            </div>
+                                        ));
+                                    })()}
+
+                                    {/* Show "View Itinerary" button if this message contains valid itinerary JSON */}
+                                    {(() => {
+                                        // Helper to check if message has itinerary
+                                        const hasItinerary = () => {
+                                            // Check for XML tags first
+                                            if (msg.content.includes('<ITINERARY_DATA>') && msg.content.includes('</ITINERARY_DATA>')) {
+                                                return true;
+                                            }
+                                            // Check for JSON with required itinerary structure
+                                            if (msg.content.includes('"title"') && msg.content.includes('"days"') && msg.content.includes('"activities"')) {
+                                                return true;
+                                            }
+                                            return false;
+                                        };
+
+                                        if (!hasItinerary()) return null;
+
+                                        return (
+                                            <div className={styles.itineraryAction}>
+                                                <button
+                                                    onClick={() => {
+                                                        // If we already have an itinerary in state, just show it
+                                                        if (itinerary && itinerary.title && itinerary.days) {
                                                             setShowItinerary(true);
-                                                        } catch (e) { console.error(e); }
-                                                    }
-                                                }}
-                                                className={styles.viewItineraryBtn}
-                                            >
-                                                🗺️ View Custom Itinerary
-                                            </button>
-                                        </div>
-                                    )}
+                                                            return;
+                                                        }
+
+                                                        // Otherwise try to extract from message content
+                                                        let jsonStr = null;
+
+                                                        // 1. Try XML tags
+                                                        const xmlMatch = msg.content.match(/<ITINERARY_DATA>([\s\S]*?)<\/ITINERARY_DATA>/);
+                                                        if (xmlMatch) jsonStr = xmlMatch[1];
+
+                                                        // 2. Try code blocks
+                                                        if (!jsonStr) {
+                                                            const codeMatch = msg.content.match(/```(?:json)?\s*([\s\S]*?)```/);
+                                                            if (codeMatch) jsonStr = codeMatch[1];
+                                                        }
+
+                                                        // 3. Try raw JSON object
+                                                        if (!jsonStr) {
+                                                            const rawMatch = msg.content.match(/(\{[\s\S]*"title"[\s\S]*"days"[\s\S]*\})/);
+                                                            if (rawMatch) jsonStr = rawMatch[1];
+                                                        }
+
+                                                        if (jsonStr) {
+                                                            try {
+                                                                let cleaned = jsonStr.trim();
+                                                                let parsed;
+                                                                try {
+                                                                    parsed = JSON.parse(cleaned);
+                                                                } catch {
+                                                                    cleaned = cleaned
+                                                                        .replace(/[\r\n]+/g, ' ')
+                                                                        .replace(/\s+/g, ' ');
+                                                                    parsed = JSON.parse(cleaned);
+                                                                }
+
+                                                                if (parsed.title && parsed.days) {
+                                                                    setItinerary(parsed);
+                                                                    setShowItinerary(true);
+                                                                }
+                                                            } catch (e) {
+                                                                console.error("JSON Parse Error:", e, jsonStr?.substring(0, 200));
+                                                            }
+                                                        } else {
+                                                            // If no JSON found, check localStorage for saved itinerary
+                                                            const saved = localStorage.getItem('shywarma_last_itinerary');
+                                                            if (saved) {
+                                                                try {
+                                                                    const parsed = JSON.parse(saved);
+                                                                    if (parsed.title && parsed.days) {
+                                                                        setItinerary(parsed);
+                                                                        setShowItinerary(true);
+                                                                    }
+                                                                } catch (e) {
+                                                                    console.error("Failed to load saved itinerary", e);
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                    className={styles.viewItineraryBtn}
+                                                >
+                                                    🗺️ View Custom Itinerary
+                                                </button>
+                                            </div>
+                                        );
+                                    })()}
                                     {msg.attachments && msg.attachments.length > 0 && (
                                         <div className={`${styles.message} ${styles.assistant}`}>
                                             <HotelCarousel hotels={msg.attachments.map(a => a.data)} />
                                         </div>
                                     )}
-                                </>
+                                </React.Fragment>
                             ) : (
                                 <div key={msg.id} className={`${styles.message} ${styles.user}`}>
                                     {msg.content}
@@ -517,17 +632,88 @@ export default function ChatWidget() {
                         {streamingText !== null && (
                             <>
                                 {streamingText ? (
-                                    streamingText
-                                        .replace(/```[\s\S]*?```/g, '') // 1. Hide complete blocks
-                                        .replace(/```[\s\S]*/, '')      // 2. Hide incomplete blocks (from start of backticks to end)
-                                        .replace(/{[\s\S]*"title":[\s\S]*"days":[\s\S]*/, '') // 3. Hide partial/raw JSON
-                                        .split(/\n\n+/)
-                                        .filter(p => p.trim())
-                                        .map((paragraph, idx) => (
-                                            <div key={`streaming-${idx}`} className={`${styles.message} ${styles.assistant}`}>
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph + (idx === streamingText.split(/\n\n+/).length - 1 ? ' ' : '')}</ReactMarkdown>
-                                            </div>
-                                        ))
+                                    (() => {
+                                        // Check if itinerary is being generated
+                                        const isGeneratingItinerary =
+                                            streamingText.includes('<ITINERARY_DATA>') ||
+                                            streamingText.includes('```json') ||
+                                            streamingText.includes('"days":') ||
+                                            streamingText.includes('"activities":');
+
+                                        const cleanedParagraphs = streamingText
+                                            .replace(/<ITINERARY_DATA>[\s\S]*?<\/ITINERARY_DATA>/g, '')
+                                            .replace(/<ITINERARY_DATA>[\s\S]*/g, '')
+                                            .replace(/<\/?ITINERARY_DATA[^>]*>/g, '') // Catch any remaining tag fragments
+                                            .replace(/```[\s\S]*?```/g, '')
+                                            .replace(/```[\s\S]*/g, '')
+                                            .replace(/\{[\s\S]*"title"[\s\S]*"days"[\s\S]*/g, '')
+                                            .replace(/\{\s*"time"\s*:[\s\S]*/g, '') // Catch partial activity objects
+                                            .replace(/,\s*\{\s*"time"\s*:/g, '') // Catch trailing activity objects
+                                            .replace(/,\s*\{\s*"day"\s*:/g, '') // Catch partial day objects
+                                            .replace(/"activities"\s*:\s*\[[\s\S]*/g, '') // Catch activities array start
+                                            .replace(/"description"\s*:\s*"[^"]*$/g, '') // Catch incomplete description strings
+                                            .replace(/SUGGESTED_QUESTION:.*$/gm, '')
+                                            .split(/\n\n+/)
+                                            .filter(p => {
+                                                const cleaned = p.trim();
+                                                if (!cleaned) return false;
+                                                if (cleaned.startsWith('SUGGESTED_QUESTION')) return false;
+                                                return true;
+                                            });
+
+                                        // Show itinerary loading state
+                                        if (isGeneratingItinerary && cleanedParagraphs.length === 0) {
+                                            return (
+                                                <div className={`${styles.message} ${styles.assistant} ${styles.itineraryLoading}`}>
+                                                    <div className={styles.itineraryLoadingContent}>
+                                                        <span className={styles.itineraryLoadingIcon}>🗺️</span>
+                                                        <span>Creating your personalized itinerary...</span>
+                                                        <div className={styles.typingIndicator}>
+                                                            <span></span>
+                                                            <span></span>
+                                                            <span></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (cleanedParagraphs.length === 0) {
+                                            return (
+                                                <div className={`${styles.message} ${styles.assistant}`}>
+                                                    <div className={styles.typingIndicator}>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Show regular content + itinerary loading if both exist
+                                        return (
+                                            <>
+                                                {cleanedParagraphs.map((paragraph, idx) => (
+                                                    <div key={`streaming-${idx}`} className={`${styles.message} ${styles.assistant}`}>
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph}</ReactMarkdown>
+                                                    </div>
+                                                ))}
+                                                {isGeneratingItinerary && (
+                                                    <div className={`${styles.message} ${styles.assistant} ${styles.itineraryLoading}`}>
+                                                        <div className={styles.itineraryLoadingContent}>
+                                                            <span className={styles.itineraryLoadingIcon}>🗺️</span>
+                                                            <span>Creating your personalized itinerary...</span>
+                                                            <div className={styles.typingIndicator}>
+                                                                <span></span>
+                                                                <span></span>
+                                                                <span></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()
                                 ) : (
                                     <div className={`${styles.message} ${styles.assistant}`}>
                                         <div className={styles.typingIndicator}>
@@ -605,8 +791,9 @@ export default function ChatWidget() {
                     itinerary={itinerary}
                     onClose={() => setShowItinerary(false)}
                     onEdit={(instruction) => {
-                        // Send edit request but keep canvas open to show loading state
-                        handleSend(`Edit this itinerary: ${instruction}`);
+                        // Send edit request with current itinerary context
+                        const itineraryContext = JSON.stringify(itinerary);
+                        handleSend(`Edit this itinerary based on my instruction: "${instruction}"\n\nCurrent itinerary to modify:\n<ITINERARY_DATA>${itineraryContext}</ITINERARY_DATA>`);
                     }}
                     isLoading={isLoading}
                 />
