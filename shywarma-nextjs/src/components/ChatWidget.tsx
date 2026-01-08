@@ -216,7 +216,7 @@ export default function ChatWidget() {
 
     // handleVerifyPhone removed
 
-    const handleSend = async (manualInput?: string) => {
+    const handleSend = async (manualInput?: string, displayOverride?: string) => {
         // Use manualInput if provided, otherwise fall back to state input
         const textToSend = manualInput || input;
 
@@ -228,8 +228,8 @@ export default function ChatWidget() {
         setIsLoading(true);
         setStreamingText("");
 
-        // Add user message immediately
-        addMessage("user", textToSend);
+        // Add user message immediately (use display override if provided)
+        addMessage("user", displayOverride || textToSend);
 
         // Update user preferences based on query
         if (userPrefs) {
@@ -827,7 +827,10 @@ export default function ChatWidget() {
                     onEdit={(instruction) => {
                         // Send edit request with current itinerary context
                         const itineraryContext = JSON.stringify(itinerary);
-                        handleSend(`Edit this itinerary based on my instruction: "${instruction}"\n\nCurrent itinerary to modify:\n<ITINERARY_DATA>${itineraryContext}</ITINERARY_DATA>`);
+                        handleSend(
+                            `Edit this itinerary based on my instruction: "${instruction}"\n\nCurrent itinerary to modify:\n<ITINERARY_DATA>${itineraryContext}</ITINERARY_DATA>`,
+                            `Edit itinerary: "${instruction}"`
+                        );
                     }}
                     isLoading={isLoading}
                 />

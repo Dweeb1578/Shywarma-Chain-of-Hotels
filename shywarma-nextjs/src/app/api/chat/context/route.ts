@@ -52,12 +52,14 @@ export async function POST(req: NextRequest) {
         
         TASK:
         1. Generate a brief, warm greeting (1 sentence) acknowledging their previous chat context.
-        2. Generate 3 short, relevant suggested questions they might want to ask next on the website.
+        2. Generate 3 short suggested USER ACTIONS (first person).
+           - Example: "Show me hotels", "I want to relax", "Check prices"
+           - BAD: "What are you looking for?"
         
         OUTPUT FORMAT (JSON):
         {
             "greeting": "Your greeting here...",
-            "suggestions": ["Question 1", "Question 2", "Question 3"]
+            "suggestions": ["User Action 1", "User Action 2", "User Action 3"]
         }
         `;
 

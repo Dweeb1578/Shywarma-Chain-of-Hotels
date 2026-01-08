@@ -60,13 +60,33 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Input validation
-        const lengthCheck = validateMessageLength(rawQuery, 500);
+        const hasItineraryData = rawQuery.includes('<ITINERARY_DATA>');
+        const maxLength = hasItineraryData ? 20000 : 1000; // Allow 20k chars for itinerary context
+
+        const lengthCheck = validateMessageLength(rawQuery, maxLength);
         if (!lengthCheck.allowed) {
             return NextResponse.json({ error: lengthCheck.reason }, { status: 400 });
         }
 
-        // 3. Sanitize input
-        const userQuery = sanitizeInput(rawQuery);
+        // 3. Smart Sanitization
+        let userQuery = "";
+        let preservedContext = "";
+
+        if (hasItineraryData) {
+            // Extract the context block
+            const match = rawQuery.match(/<ITINERARY_DATA>([\s\S]*?)<\/ITINERARY_DATA>/);
+            if (match) {
+                preservedContext = match[0]; // Keep the whole tag block
+                // Sanitize only the user instruction part
+                const instructionPart = rawQuery.replace(match[0], "").trim();
+                userQuery = sanitizeInput(instructionPart) + "\n\n" + preservedContext;
+            } else {
+                // Fallback if tag structure is broken
+                userQuery = sanitizeInput(rawQuery);
+            }
+        } else {
+            userQuery = sanitizeInput(rawQuery);
+        }
 
         // 4. Content filtering
         const contentCheck = filterContent(userQuery);
@@ -76,8 +96,11 @@ export async function POST(req: NextRequest) {
 
         // === END SECURITY CHECKS ===
 
+        // Sanitize query for embedding/cache (remove huge JSON context if present)
+        const sanitizedQuery = userQuery.replace(/<ITINERARY_DATA>[\s\S]*?<\/ITINERARY_DATA>/g, "").trim();
+
         // Hash query for cache key
-        const queryHash = crypto.createHash('md5').update(userQuery.toLowerCase().trim()).digest('hex');
+        const queryHash = crypto.createHash('md5').update(sanitizedQuery.toLowerCase().trim()).digest('hex');
         const cacheKey = `chat:context:${queryHash}`;
 
         let context: string | null = null;
@@ -102,7 +125,7 @@ export async function POST(req: NextRequest) {
             const embedStart = Date.now();
             const embeddingResult = await pinecone.inference.embed(
                 EMBEDDING_MODEL,
-                [userQuery],
+                [sanitizedQuery],
                 { inputType: 'query', truncate: 'END' }
             );
             const embedTime = Date.now() - embedStart;
@@ -262,15 +285,26 @@ export async function POST(req: NextRequest) {
                 </ITINERARY_DATA>
             DO NOT print the JSON inside the text flow. Print it inside the tags at the VERY END.
             
-            CRITICAL - SUGGESTED QUESTION (ALWAYS REQUIRED):
+            CRITICAL - SUGGESTED ACTION (ALWAYS REQUIRED):
             You MUST ALWAYS end EVERY response with exactly this format on its own line:
-            SUGGESTED_QUESTION: [a follow-up question]
+            SUGGESTED_QUESTION: [Short text for a user button]
             
-            IMPORTANT: The question must be phrased as something the USER would ask the bot, NOT what the bot asks the user.
-            CORRECT: "What are the room rates?", "Tell me about Dubai packages", "Show me honeymoon deals"
-            WRONG: "What are your travel dates?", "What is your budget?" - These are bot-to-user questions, never use these.
+            The [Short text] must be written from the USER's PERSPECTIVE (First Person).
+            It represents what the USER might want to say next.
             
-            Example ending: "...wonderful amenities.\\n\\nSUGGESTED_QUESTION: What are the room rates?"
+            ✅ CORRECT EXPERT EXAMPLES (User speaking to AI):
+            - "Show me room rates"
+            - "I want to book a suite"
+            - "What is the weather like?"
+            - "Create a 5-day itinerary"
+            - "Do you have honeymoon packages?"
+            
+            ❌ WRONG (AI speaking to User):
+            - "What is your budget?" (The user wouldn't ask themselves this)
+            - "Would you like to book?" (The user wouldn't ask themselves this)
+            - "How can I help?"
+            
+            Example ending: "...luxury amenities.\\n\\nSUGGESTED_QUESTION: Show me the dining options"
             Failing to include SUGGESTED_QUESTION is a critical error. NEVER forget it.`;
 
         // 4. Construct Groq Messages
